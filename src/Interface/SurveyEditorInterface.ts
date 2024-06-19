@@ -1,5 +1,6 @@
 import { Dayjs } from "dayjs";
 import { ReactNode } from "react";
+import { z } from "zod";
 
 export interface StatusOption {
   value: SurveyStatusValue;
@@ -116,6 +117,23 @@ export interface Answer {
   questionsId: string;
   openEndDirection: "vertical" | "horizontal";
 }
+
+export const answerSchema = z.object({
+  id: z.string(),
+  key: z.union([z.number(), z.string()]),
+  label: z.string(),
+  index: z.number(),
+  exclusive: z.boolean(),
+  forceopenendresponse: z.boolean(),
+  openend: z.boolean(),
+  number_only: z.boolean(),
+  ai_categorize: z.boolean(),
+  ai_categorize_list: z.array(z.any()),
+  questionsId: z.string(),
+  openEndDirection: z.union([z.literal("vertical"), z.literal("horizontal")]),
+});
+
+export type TAnswer = z.infer<typeof answerSchema>;
 
 export interface QuestionPanels {
   header: string;

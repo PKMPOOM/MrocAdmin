@@ -9,7 +9,8 @@ import PreventPublicRoute from "./Route/PreventPublicRoute";
 import UserLayoutRoute from "./Route/UserLayoutRoute";
 
 const GenerativeCreate = React.lazy(
-  () => import("./Pages/Admin/Quantitative/Survey/SmartCreate/SmartCreatePage")
+  () =>
+    import("./Pages/Admin/Quantitative/Survey/SmartCreate/GenerativeCreatePage")
 );
 
 const Dashboard = React.lazy(() => import("./Pages/Admin/Dashboard/Dashboard"));

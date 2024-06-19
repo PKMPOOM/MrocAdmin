@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { Card, Col, DatePicker, Row, Typography } from "antd";
 import "chart.js/auto";
+import dayjs from "dayjs";
+import { useState } from "react";
 import { Line } from "react-chartjs-2";
-import { Card, DatePicker, Col, Row, Typography } from "antd";
-import dayjs, { Dayjs } from "dayjs";
-import { EventValue } from "rc-picker/lib/interface";
+// import { EventValue } from "rc-picker/lib/interface";
 
 const { Title } = Typography;
 
@@ -66,8 +66,9 @@ function Subtab_overview() {
   };
 
   function getMonthsBetweenDates(
-    startdate: EventValue<Dayjs>,
-    enddate: EventValue<Dayjs>
+    // todo fix any
+    startdate: any,
+    enddate: any
   ) {
     if (enddate && startdate) {
       const startDate = startdate;
