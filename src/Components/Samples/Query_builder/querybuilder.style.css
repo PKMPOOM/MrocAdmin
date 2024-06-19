@@ -1,0 +1,19 @@
+.queryBuilder {
+  background-color: #fff;
+  border: 1px solid #c2e0ff;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.ruleGroup {
+  background-color: rgba(230, 244, 255, 0.7);
+  border: 1px solid #c2e0ff;
+}
+
+.rule-value {
+  width: 100%;
+}
+
+.css-dev-only-do-not-override-fpg3f5.ant-select {
+  width: 100%;
+}
