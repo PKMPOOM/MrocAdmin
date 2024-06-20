@@ -42,8 +42,8 @@ const SmartCreatePage = () => {
     setParsedData([]);
 
     const eventSource = new EventSource(
-      `http://localhost:9999/generative/streaming/${promptString.replaceAll(
-        " ",
+      `http://localhost:9999/generative/streaming/${promptString.replace(
+        / /g,
         "_"
       )}`,
       {
