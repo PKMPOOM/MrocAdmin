@@ -28,23 +28,15 @@ type GenQuestionList = z.infer<typeof GenQuestionListSchema>;
 
 const SmartCreatePage = () => {
   const [SubmitType, setSubmitType] = useState<SubmitType>("get-template");
-  // const [SurveyQuestionData, setSurveyQuestionData] = useState<Question[]>([]);
   const [parsedData, setParsedData] = useState<GenQuestionList[]>([]);
   const [rawData, setRawData] = useState("");
-
-  // const getGenerativeData = async () => {
-  //   const response = await getTestSurveyQuestion(Prompt);
-  //   // setSurveyQuestionData(response.data.QuestionList);
-  // };
 
   const generateStreamData = async (promptString: string) => {
     setRawData("");
     setParsedData([]);
 
-    const prompt = promptString.replace(/ /g, "_");
-
     const eventSource = new EventSource(
-      `http://localhost:9999/generative/streaming/${prompt}`,
+      `http://localhost:9999/generative/streaming/${promptString}`,
       {
         withCredentials: true,
       }
@@ -68,8 +60,6 @@ const SmartCreatePage = () => {
 
           setRawData(data);
           try {
-            // console.log(jsonObject);
-
             const parsedObject = JSON.parse(jsonObject);
             const { success, data } =
               GenQuestionListSchema.safeParse(parsedObject);
@@ -92,12 +82,13 @@ const SmartCreatePage = () => {
     };
   };
 
-  const onSubmit = async (e: string) => {
-    console.log(e);
+  const onSubmit = async ({ instruction }: any) => {
+    const prompt = instruction.replace(/ /g, "_");
 
     switch (SubmitType) {
       case "create-new":
-        await generateStreamData(e);
+        await generateStreamData(prompt);
+
         setRawData("");
 
         break;
