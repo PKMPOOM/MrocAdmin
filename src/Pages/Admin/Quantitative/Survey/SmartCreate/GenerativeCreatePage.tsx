@@ -1,21 +1,9 @@
-import { Button, Form, Input, Typography } from "antd";
+import { Button, Form, InputNumber, Select, Typography } from "antd";
 import { useState } from "react";
 import z from "zod";
-// import NewTemplateCard from "~/component/Survey/Modal/NewTemplateCard";
-// import {
-//   getTextResponse,
-//   getTestSurveyQuestion,
-//   getTestStreamingText,
-// } from "./api";
-// import LoadingFallback from "~/component/Global/Suspense/LoadingFallback";
-// import { Pages, Question } from "~/interface/SurveyEditorInterface";
-// import Question_Preview from "~/component/Survey/Editor/QuestionPageEditor/Question_Preview";
-// const { Text } = Typography;
-
-// import PageContainer from "~/component/Survey/Editor/QuestionPageEditor/QuestionContainer";
 import GenerativeQuestionPreview from "./QuestionPreview";
-
 const { Title } = Typography;
+
 type SubmitType = "get-template" | "create-new";
 
 const GenQuestionListSchema = z.object({
@@ -29,14 +17,29 @@ type GenQuestionList = z.infer<typeof GenQuestionListSchema>;
 const SmartCreatePage = () => {
   const [SubmitType, setSubmitType] = useState<SubmitType>("get-template");
   const [parsedData, setParsedData] = useState<GenQuestionList[]>([]);
+  const [Topic, setTopic] = useState("Customer experience");
   const [rawData, setRawData] = useState("");
+  const [IsStreaming, setIsStreaming] = useState(false);
+  const [isStreamingDone, setisStreamingDone] = useState(false);
+  const [form] = Form.useForm();
 
-  const generateStreamData = async (promptString: string) => {
+  const generateStreamData = async (
+    promptString: string,
+    questionAmount: number,
+    AImodel: string
+  ) => {
     setRawData("");
     setParsedData([]);
+    setIsStreaming(true);
+    setisStreamingDone(false);
 
     const eventSource = new EventSource(
-      `http://localhost:9999/generative/streaming/${promptString}`,
+      `${
+        import.meta.env.VITE_API_URL
+      }/generative/streaming/${promptString.replace(
+        / /g,
+        "_"
+      )}?Qamount=${questionAmount}&model=${AImodel}`,
       {
         withCredentials: true,
       }
@@ -46,6 +49,8 @@ const SmartCreatePage = () => {
 
     eventSource.onmessage = function (event) {
       if (event.data === "[DONE]") {
+        setIsStreaming(false);
+        setisStreamingDone(true);
         eventSource.close();
       } else {
         setRawData((prev) => prev + event.data);
@@ -57,19 +62,16 @@ const SmartCreatePage = () => {
 
           const jsonObject = data.slice(startIndex, endIndex + 1); // Extract the JSON object
           data = data.slice(endIndex + 1); // Remove the extracted JSON object from the accumulated data
+          setRawData(data); // remove the extracted JSON object from the accumulated data state
 
-          setRawData(data);
           try {
             const parsedObject = JSON.parse(jsonObject);
             const { success, data } =
               GenQuestionListSchema.safeParse(parsedObject);
 
             if (success) {
-              // console.log(parsedObject);
               setParsedData((prev) => [...prev, data]);
             }
-
-            // Make an API call
           } catch (err) {
             console.error("Error while parsing JSON:", err);
           }
@@ -79,18 +81,16 @@ const SmartCreatePage = () => {
 
     eventSource.onerror = function () {
       eventSource.close();
+      setisStreamingDone(true);
+      setIsStreaming(false);
     };
   };
 
-  const onSubmit = async ({ instruction }: any) => {
-    const prompt = instruction.replace(/ /g, "_");
-
+  const onSubmit = async ({ Qamount, model }: formSchema) => {
     switch (SubmitType) {
       case "create-new":
-        await generateStreamData(prompt);
-
+        await generateStreamData(Topic, Qamount, model);
         setRawData("");
-
         break;
 
       default:
@@ -98,108 +98,18 @@ const SmartCreatePage = () => {
     }
   };
 
-  const [form] = Form.useForm();
+  type formSchema = {
+    instruction: string;
+    model: string;
+    Qamount: number;
+  };
   return (
-    <div className=" tw-px-6 tw-flex tw-flex-col tw-gap-4 tw-h-[calc(100vh-64px)] tw-relative ">
+    <div className=" tw-px-6 tw-flex tw-flex-col tw-gap-4 tw-h-[calc(100vh-64px)] tw-relative  ">
       <div className="tw-flex tw-flex-row tw-items-center tw-justify-between ">
         <Title level={3}>Generative create</Title>
-        {SubmitType === "get-template" ? (
-          <Button
-            onClick={async () => {
-              // await getGenerativeData();
-            }}
-            type="primary"
-          >
-            Use this template
-          </Button>
-        ) : (
-          <Button type="primary">Use this survey</Button>
-        )}
       </div>
-      <div className=" tw-flex tw-flex-row tw-gap-4  tw-h-full tw-max-w-full ">
-        <div className="  tw-w-2/5  tw-p-2">
-          <Form
-            form={form}
-            layout="vertical"
-            onFinish={onSubmit}
-            requiredMark={"optional"}
-          >
-            <div className=" tw-flex tw-flex-col tw-gap-2">
-              <Form.Item
-                name={"instruction"}
-                label={
-                  "Please explain what type of survey you would like to create"
-                }
-                rules={[
-                  { required: true, message: "Please input your instruction!" },
-                  { max: 1000, message: "Instruction is too long" },
-                  { min: 10, message: "Instruction is too short" },
-                ]}
-              >
-                <Input.TextArea
-                  placeholder="Make a wish"
-                  autoSize={{
-                    maxRows: 40,
-                    minRows: 15,
-                  }}
-                />
-              </Form.Item>
-              <div className=" tw-flex tw-flex-col tw-gap-2 tw-justify-end xl:tw-flex-row  ">
-                <Button
-                  disabled
-                  onClick={() => {
-                    form.validateFields().then(() => {
-                      setSubmitType("get-template");
-                    });
-                  }}
-                  htmlType="submit"
-                  type="primary"
-                >
-                  Get template suggestion
-                </Button>
-                <Button
-                  onClick={() => {
-                    form.validateFields().then(() => {
-                      setSubmitType("create-new");
-                    });
-                  }}
-                  htmlType="submit"
-                  type="primary"
-                >
-                  Generate new survey
-                </Button>
-              </div>
-            </div>
-          </Form>
-        </div>
+      <div className=" tw-flex tw-flex-row tw-gap-4  tw-h-full tw-max-w-full tw-justify-center ">
         <div className="  tw-flex tw-flex-col tw-w-3/5 tw-gap-2 tw-items-center  tw-h-[calc(100vh-125px)] tw-p-2 tw-overflow-auto">
-          {/* <p>here's a list of template that may fits your needs</p> */}
-          {/* {Loading ? (
-            <LoadingFallback />
-          ) : (
-            <>
-              <Button
-                onClick={async () => {
-                  setLoading(true);
-                  // await getGenerativeData();
-                  setLoading(false);
-                }}
-                type="primary"
-              >
-                survey data
-              </Button>
-              <Button
-                onClick={async () => {
-                  setLoading(true);
-                  // await generateStreamData();
-                  setLoading(false);
-                }}
-                type="primary"
-              >
-                Stream text data
-              </Button>
-            </>
-          )} */}
           <div className="   tw-flex tw-flex-wrap tw-flex-col tw-gap-2 tw-w-full ">
             <div
               key={"pages.id"}
@@ -214,42 +124,73 @@ const SmartCreatePage = () => {
                 marginBottom: "24px",
               }}
             >
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  alignContent: "center",
-                  marginBottom: 16,
+              <Form<formSchema>
+                form={form}
+                layout="vertical"
+                onFinish={onSubmit}
+                requiredMark={"optional"}
+                initialValues={{
+                  model: "gpt-3.5-turbo",
+                  Qamount: 3,
                 }}
               >
-                <Title level={5}>
-                  {/* {isStreaming ? "Streaming" : "Stream ended"} */}
-                  Test
-                </Title>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    gap: "8px",
-                  }}
-                ></div>
-              </div>
-              <Title level={5}></Title>
-              {/* <div className=" tw-bg-red-50">{rawData}</div>
-              -----
-              <div className=" tw-bg-green-50">{parsedData}</div> */}
+                <div className=" tw-flex tw-flex-col tw-justify-between tw-items-start tw-mb-4">
+                  <div className=" tw-flex tw-gap-2 tw-w-full ">
+                    <Form.Item<formSchema>
+                      label={"AI model"}
+                      name={"model"}
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please select a model",
+                        },
+                      ]}
+                    >
+                      <Select
+                        defaultValue="gpt-3.5-turbo"
+                        options={[
+                          { label: "GPT-3.5 turbo", value: "gpt-3.5-turbo" },
+                          { label: "GPT-4o", value: "gpt-4o" },
+                        ]}
+                      />
+                    </Form.Item>
+                    <Form.Item<formSchema>
+                      label={"Question amount"}
+                      name={"Qamount"}
+                    >
+                      <InputNumber defaultValue={3} />
+                    </Form.Item>
 
-              {/* <pre>{JSON.stringify(parsedData, null, 2)}</pre> */}
+                    <Button
+                      style={{ marginLeft: "auto" }}
+                      onClick={() => {
+                        form.validateFields().then(() => {
+                          setSubmitType("create-new");
+                        });
+                      }}
+                      htmlType="submit"
+                      type="primary"
+                    >
+                      Generate new survey
+                    </Button>
+                  </div>
+                  <Title
+                    level={5}
+                    editable={{
+                      onChange: (e) => {
+                        setTopic(e);
+                      },
+                    }}
+                  >
+                    {Topic}
+                  </Title>
+                </div>
+              </Form>
 
               {parsedData.map((question, qIndex) => {
                 return (
                   <div key={qIndex}>
                     <GenerativeQuestionPreview
-                      // pageSize={SurveyQuestionData.length}
-                      // Previewquestion={question}
-                      // pIndex={1}
-                      // qIndex={qIndex}
                       choices={question.answer}
                       label={question.label}
                       type={question.type}
@@ -258,10 +199,16 @@ const SmartCreatePage = () => {
                 );
               })}
               {rawData
-                .replace(/[{}"`]/g, "")
+                .replace(/[{}",`]/g, "")
                 .replace(/:/g, "")
                 .replace(/\[/g, "")
-                .replace(/\]/g, "")}
+                .replace(/\]/g, "")
+                .replace("label", "")}
+              {isStreamingDone && !IsStreaming && (
+                <div className=" tw-flex tw-my-3 tw-w-full tw-justify-center">
+                  <Button type="primary">Use this survey</Button>
+                </div>
+              )}
             </div>
           </div>
         </div>

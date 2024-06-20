@@ -46,31 +46,28 @@ function GenerativeQuestionPreview({
               /> */}
             </div>
             <div className="tw-flex tw-flex-col tw-gap-1 tw-mt-2">
-              {type === "single_select" &&
-                choices?.map((answer, index) => (
-                  <div key={index} className={`tw-flex`}>
-                    <Radio>{answer}</Radio>
-                    {/* {answer.openend ? (
-                      <Input
-                        placeholder={"please answer"}
-                        style={{
-                          marginLeft:
-                            answer.openEndDirection === "horizontal"
-                              ? "0"
-                              : "24px",
-                          width: "50%",
-                        }}
-                      />
-                    ) : null} */}
-                  </div>
-                ))}
+              {type === "single_select" && (
+                <Radio.Group>
+                  {choices?.map((answer, index) => (
+                    <div key={index} className={`tw-flex`}>
+                      <Radio value={answer}>{answer}</Radio>
+                    </div>
+                  ))}
+                </Radio.Group>
+              )}
 
-              {type === "multi_select" &&
-                choices.map((answer, index) => (
-                  <div key={index}>
-                    <Checkbox>{answer}</Checkbox>
+              {type === "multi_select" && (
+                <Checkbox.Group>
+                  <div className=" tw-flex tw-flex-col tw-gap-1">
+                    {choices.map((answer, index) => (
+                      <Checkbox key={index} value={answer}>
+                        {answer}
+                      </Checkbox>
+                    ))}
                   </div>
-                ))}
+                </Checkbox.Group>
+              )}
+
               {type === "text" && (
                 <Input.TextArea placeholder="please answer" />
               )}

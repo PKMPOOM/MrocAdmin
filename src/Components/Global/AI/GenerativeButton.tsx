@@ -6,22 +6,31 @@ type Props = {
 } & React.ComponentProps<typeof Button>;
 
 const GenerativeButton = ({ children, ...props }: Props) => {
-  const colors1 = ["#6253E1", "#04BEFE"];
-  const colors2 = ["#6859ED", "#10C3FF"];
-  const colors3 = ["#5A4ECE", "#04B0EA"];
+  const defaultBgColor = ["#6253E1", "#04BEFE"];
+  const defaultBgColorhover = ["#7b6df9", "#21c6fd"];
+  const defaultBgColorActive = ["#5A4ECE", "#04B0EA"];
   return (
     <ConfigProvider
       theme={{
         components: {
           Button: {
-            colorPrimary: `linear-gradient(135deg,${colors1.join(",")})`,
-            colorPrimaryHover: `linear-gradient(90deg, ${colors2.join(",")})`,
-            colorPrimaryActive: `linear-gradient(90deg, ${colors3.join(",")})`,
+            defaultBg: `linear-gradient(135deg,${defaultBgColor.join(",")})`,
+            defaultActiveBg: `linear-gradient(90deg, ${defaultBgColorActive.join(
+              ","
+            )})`,
+            defaultHoverBg: `linear-gradient(90deg, ${defaultBgColorhover.join(
+              ","
+            )})`,
+            defaultColor: "#fff",
+            defaultHoverColor: "#fff",
+            defaultBorderColor: "#fff",
+            defaultHoverBorderColor: "#fff",
+            defaultActiveColor: "#fff",
           },
         },
       }}
     >
-      <Button type="primary" {...props}>
+      <Button {...props}>
         <div className=" tw-flex tw-gap-2 tw-items-center tw-justify-center ">
           <span>
             <BsStars />
