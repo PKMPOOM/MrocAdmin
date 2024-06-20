@@ -41,11 +41,10 @@ const SmartCreatePage = () => {
     setRawData("");
     setParsedData([]);
 
+    const prompt = promptString.replace(/ /g, "_");
+
     const eventSource = new EventSource(
-      `http://localhost:9999/generative/streaming/${promptString.replace(
-        / /g,
-        "_"
-      )}`,
+      `http://localhost:9999/generative/streaming/${prompt}`,
       {
         withCredentials: true,
       }
