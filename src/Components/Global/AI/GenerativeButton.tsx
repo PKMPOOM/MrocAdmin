@@ -14,6 +14,7 @@ const GenerativeButton = ({ children, ...props }: Props) => {
       theme={{
         components: {
           Button: {
+            // bg
             defaultBg: `linear-gradient(135deg,${defaultBgColor.join(",")})`,
             defaultActiveBg: `linear-gradient(90deg, ${defaultBgColorActive.join(
               ","
@@ -21,11 +22,15 @@ const GenerativeButton = ({ children, ...props }: Props) => {
             defaultHoverBg: `linear-gradient(90deg, ${defaultBgColorhover.join(
               ","
             )})`,
+            // text
             defaultColor: "#fff",
             defaultHoverColor: "#fff",
+            defaultActiveColor: "#fff",
+            // border
             defaultBorderColor: "#fff",
             defaultHoverBorderColor: "#fff",
-            defaultActiveColor: "#fff",
+            // shadow
+            defaultShadow: "0 2px 0 rgba(5, 145, 255, 0.1)",
           },
         },
       }}
