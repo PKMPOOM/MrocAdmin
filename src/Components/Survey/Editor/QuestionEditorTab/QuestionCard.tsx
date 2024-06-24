@@ -5,11 +5,15 @@ import { useAddQuestionOnClick } from "../QuestionTree/question.api";
 import { produce } from "immer";
 import { useShallow } from "zustand/react/shallow";
 import { useSurveyEditorStore } from "~/store/useSurveyEditorStore";
-import { QueryResponse } from "~/interface/SurveyEditorInterface";
+import {
+  QueryResponse,
+  Question,
+  TQuestionType,
+} from "~/interface/SurveyEditorInterface";
 import { questionTemplate } from "~/component/Helper/QuestionAnswerDefault";
 const { useToken } = theme;
 type QuestionCardProps = {
-  value: string;
+  value: TQuestionType;
   draging: boolean;
   display: boolean;
   label: string;
@@ -60,7 +64,7 @@ function QuestionCard({
                     currentData,
                     (draftState: QueryResponse) => {
                       const { questionlist } = draftState;
-                      const newQuestion = {
+                      const newQuestion: Question = {
                         ...questionTemplate,
                         label: `New ${label} question`,
                         type: value,

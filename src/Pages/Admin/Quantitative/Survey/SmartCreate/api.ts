@@ -1,10 +1,13 @@
 import { appAPI } from "~/utils/fetchUtils";
+import { SubmitPayload } from "./type";
 
 const surveyAPI = new appAPI("/generative");
 
-export const getTextResponse = () => {
-  return surveyAPI.basicFetch("/survey");
+type Response = {
+  message: string;
+  id: string;
 };
-export const getTestSurveyQuestion = () => {
-  return surveyAPI.basicFetch("/test");
+
+export const createNewSurveyFromGenerted = (data: SubmitPayload) => {
+  return surveyAPI.post<Response>("/survey", data);
 };

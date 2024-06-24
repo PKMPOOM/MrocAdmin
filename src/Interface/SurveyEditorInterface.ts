@@ -1,5 +1,6 @@
 import { Dayjs } from "dayjs";
 import { ReactNode } from "react";
+import { z } from "zod";
 
 export interface StatusOption {
   value: SurveyStatusValue;
@@ -89,7 +90,7 @@ export interface Question {
   index: number;
   label: string;
   isselected: boolean;
-  type: string;
+  type: TQuestionType;
   precodesallowed: number;
   presetanswer: boolean;
   isrequired: boolean;
@@ -101,6 +102,35 @@ export interface Question {
   pageIdpage: string;
   answers: Answer[];
 }
+
+export const QuestionTypeSchema = z.union([
+  z.literal("single_select"),
+  z.literal("multi_select"),
+  z.literal("text_area"),
+  z.literal("dropdown"),
+  z.literal("file_upload"),
+  z.literal("info"),
+  z.literal("date"),
+  z.literal("up_down"),
+  z.literal("grid"),
+  z.literal("side_by_side"),
+  z.literal("slider"),
+  z.literal("rank_sort"),
+  z.literal("allocation_slider"),
+  z.literal("text_balance"),
+  z.literal("rating"),
+  z.literal("nps"),
+  z.literal("quota"),
+  z.literal("screening"),
+  z.literal("exec_block"),
+  z.literal("terminate"),
+  z.literal("points"),
+  z.literal("timing"),
+  z.literal("open_text_list"),
+  z.literal("page_break"),
+]);
+
+export type TQuestionType = z.infer<typeof QuestionTypeSchema>;
 
 export interface Answer {
   id: string;
@@ -117,6 +147,23 @@ export interface Answer {
   openEndDirection: "vertical" | "horizontal";
 }
 
+export const answerSchema = z.object({
+  id: z.string(),
+  key: z.union([z.number(), z.string()]),
+  label: z.string(),
+  index: z.number(),
+  exclusive: z.boolean(),
+  forceopenendresponse: z.boolean(),
+  openend: z.boolean(),
+  number_only: z.boolean(),
+  ai_categorize: z.boolean(),
+  ai_categorize_list: z.array(z.any()),
+  questionsId: z.string(),
+  openEndDirection: z.union([z.literal("vertical"), z.literal("horizontal")]),
+});
+
+export type TAnswer = z.infer<typeof answerSchema>;
+
 export interface QuestionPanels {
   header: string;
   key: string;
@@ -126,7 +173,7 @@ export interface QuestionPanels {
 export interface QuestionCard {
   index: number;
   label: string;
-  value: string;
+  value: TQuestionType;
   icon: ReactNode;
 }
 

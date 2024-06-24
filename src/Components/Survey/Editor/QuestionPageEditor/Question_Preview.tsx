@@ -33,7 +33,7 @@ function Question_Preview({ pageSize, pIndex, qIndex }: QuestionPreviewProps) {
   }
 
   switch (question.type) {
-    case "page break":
+    case "page_break":
       return <div>page break</div>;
 
     default:
@@ -100,6 +100,10 @@ function Question_Preview({ pageSize, pIndex, qIndex }: QuestionPreviewProps) {
 
               {question.type === "slider" && (
                 <ICSlider scale={question.answers} />
+              )}
+              
+              {question.type === "text_area" && (
+                <Input.TextArea placeholder="please answer" />
               )}
 
               {question.type === "file_upload" && <FaFileUpload />}

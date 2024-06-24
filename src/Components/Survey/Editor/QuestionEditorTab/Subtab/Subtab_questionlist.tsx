@@ -63,10 +63,10 @@ const panels: QuestionPanels[] = [
       {
         index: 7,
         label: "Up or Down",
-        value: "up_or_down",
+        value: "up_down",
         icon: <FaThumbsUp />,
       },
-      { index: 8, label: "Input", value: "input", icon: <FaTextHeight /> },
+      { index: 8, label: "Input", value: "text_area", icon: <FaTextHeight /> },
       {
         index: 9,
         label: "File upload",
@@ -83,7 +83,7 @@ const panels: QuestionPanels[] = [
       {
         index: 11,
         label: "Side by side",
-        value: "side by side",
+        value: "side_by_side",
         icon: <FaGripVertical />,
       },
     ],
@@ -103,7 +103,7 @@ const panels: QuestionPanels[] = [
       {
         index: 15,
         label: "Text balance",
-        value: "taxt_balance",
+        value: "text_balance",
         icon: <FaBalanceScale />,
       },
       { index: 16, label: "Rating", value: "rating", icon: <FaStar /> },
@@ -124,7 +124,7 @@ const panels: QuestionPanels[] = [
       {
         index: 20,
         label: "Executable block",
-        value: "executable_block",
+        value: "exec_block",
         icon: <FaCogs />,
       },
       {
@@ -136,7 +136,7 @@ const panels: QuestionPanels[] = [
       {
         index: 22,
         label: "Points charger",
-        value: "points_charger",
+        value: "points",
         icon: <FaDollarSign />,
       },
       { index: 23, label: "Timing", value: "timing", icon: <FaClock /> },

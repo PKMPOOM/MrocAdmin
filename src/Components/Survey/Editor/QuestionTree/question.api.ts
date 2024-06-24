@@ -13,7 +13,7 @@ export type QuestionOptionsProps = {
   useResponseRequirement?: boolean;
   usePrecodesOption?: boolean;
   presetAnswers?: boolean;
-  selectedPrecodesOption?: "shuffle" | "sort";
+  selectedPrecodesOption?: "shuffle" | "sort" | "none";
   shuffleBy?: string | undefined;
   sortDirection?: "asc" | "dsc";
   forceQuestionResponse?: boolean;
