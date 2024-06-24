@@ -1,18 +1,17 @@
 import { Button, Form, InputNumber, Select, Typography } from "antd";
 import { useState } from "react";
-import z from "zod";
+import GenerateSurveyModal from "./GenerateSurveyModal";
 import GenerativeQuestionPreview from "./QuestionPreview";
+import { GenQuestionList, GenQuestionListSchema } from "./type";
 const { Title } = Typography;
 
 type SubmitType = "get-template" | "create-new";
 
-const GenQuestionListSchema = z.object({
-  label: z.string(),
-  answer: z.array(z.string()),
-  type: z.string(),
-});
-
-type GenQuestionList = z.infer<typeof GenQuestionListSchema>;
+type formSchema = {
+  instruction: string;
+  model: string;
+  Qamount: number;
+};
 
 const SmartCreatePage = () => {
   const [SubmitType, setSubmitType] = useState<SubmitType>("get-template");
@@ -21,6 +20,7 @@ const SmartCreatePage = () => {
   const [rawData, setRawData] = useState("");
   const [IsStreaming, setIsStreaming] = useState(false);
   const [isStreamingDone, setisStreamingDone] = useState(false);
+  const [IsCreateSurveyModalOpen, setIsCreateSurveyModalOpen] = useState(false);
   const [form] = Form.useForm();
 
   const generateStreamData = async (
@@ -98,18 +98,19 @@ const SmartCreatePage = () => {
     }
   };
 
-  type formSchema = {
-    instruction: string;
-    model: string;
-    Qamount: number;
+  const onCreateNewSurvey = () => {
+    // todo: open modal
+    // todo: modal text input for survey name and status selection
+    setIsCreateSurveyModalOpen(true);
   };
+
   return (
     <div className=" tw-px-6 tw-flex tw-flex-col tw-gap-4 tw-h-[calc(100vh-64px)] tw-relative  ">
       <div className="tw-flex tw-flex-row tw-items-center tw-justify-between ">
         <Title level={3}>Generative create</Title>
       </div>
       <div className=" tw-flex tw-flex-row tw-gap-4  tw-h-full tw-max-w-full tw-justify-center ">
-        <div className="  tw-flex tw-flex-col tw-w-3/5 tw-gap-2 tw-items-center  tw-h-[calc(100vh-125px)] tw-p-2 tw-overflow-auto">
+        <div className="  tw-flex tw-flex-col tw-w-4/5 tw-gap-2 tw-items-center  tw-h-[calc(100vh-125px)] tw-p-2 tw-overflow-auto">
           <div className="   tw-flex tw-flex-wrap tw-flex-col tw-gap-2 tw-w-full ">
             <div
               key={"pages.id"}
@@ -157,6 +158,11 @@ const SmartCreatePage = () => {
                     <Form.Item<formSchema>
                       label={"Question amount"}
                       name={"Qamount"}
+                      rules={[
+                        {
+                          required: true,
+                        },
+                      ]}
                     >
                       <InputNumber defaultValue={3} />
                     </Form.Item>
@@ -171,7 +177,7 @@ const SmartCreatePage = () => {
                       htmlType="submit"
                       type="primary"
                     >
-                      Generate new survey
+                      Start Generate
                     </Button>
                   </div>
                   <Title
@@ -198,21 +204,31 @@ const SmartCreatePage = () => {
                   </div>
                 );
               })}
+
               {rawData
                 .replace(/[{}",`]/g, "")
                 .replace(/:/g, "")
                 .replace(/\[/g, "")
                 .replace(/\]/g, "")
                 .replace("label", "")}
+
               {isStreamingDone && !IsStreaming && (
                 <div className=" tw-flex tw-my-3 tw-w-full tw-justify-center">
-                  <Button type="primary">Use this survey</Button>
+                  <Button onClick={onCreateNewSurvey} type="primary">
+                    Use this survey
+                  </Button>
                 </div>
               )}
             </div>
           </div>
         </div>
       </div>
+      <GenerateSurveyModal
+        questionData={parsedData}
+        topic={Topic}
+        modalOpen={IsCreateSurveyModalOpen}
+        setModalOpen={setIsCreateSurveyModalOpen}
+      />
     </div>
   );
 };
