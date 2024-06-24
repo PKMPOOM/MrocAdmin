@@ -261,16 +261,17 @@ function Question_Active({
           />
         ))}
         <div className="tw-flex tw-justify-center">
-          {/*//! add new precode */}
-          <Button
-            onClick={() => {
-              addAnswer();
-            }}
-            type="link"
-            icon={<PlusOutlined />}
-          >
-            Add Answer
-          </Button>
+          {question.type !== "text_area" && (
+            <Button
+              onClick={() => {
+                addAnswer();
+              }}
+              type="link"
+              icon={<PlusOutlined />}
+            >
+              Add Answer
+            </Button>
+          )}
         </div>
       </div>
       {!isLastIndex && (

@@ -348,13 +348,13 @@ function EditQuestion() {
           </div>
         </Form.Item>
         {/* <Showif /> */}
-        {questionType === "single select"
+        {questionType === "single_select"
           ? "more single select settings"
           : null}
-        {questionType === "multi select" ? "more multi select settings" : null}
+        {questionType === "multi_select" ? "more multi select settings" : null}
         {questionType === "slider" ? "more slider settings" : null}
-        {questionType === "open text" ? "more open text settings" : null}
-        {questionType === "file upload" ? "more file upload settings" : null}
+        {questionType === "text_area" ? "more open text settings" : null}
+        {questionType === "file_upload" ? "more file upload settings" : null}
       </div>
     </Form>
   );

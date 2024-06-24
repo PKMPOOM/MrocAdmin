@@ -48,7 +48,7 @@ export const questionTemplate: Question = {
   id: "",
   key: 0,
   label: "",
-  type: "",
+  type: "single_select",
   precodesallowed: 100,
   presetanswer: false,
   POisselected: false,

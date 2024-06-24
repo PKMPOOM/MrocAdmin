@@ -341,7 +341,7 @@ const QuestionTree = () => {
                           );
 
                           switch (question.type) {
-                            case "page break":
+                            case "page_break":
                               return (
                                 <Draggable
                                   draggableId={question.id}
@@ -497,7 +497,7 @@ const QuestionTree = () => {
                                           }}
                                         >
                                           {pages.questions[qIndex + 1]?.type ===
-                                            "page break" ||
+                                            "page_break" ||
                                           pages.questions.length - 1 ===
                                             qIndex ? null : (
                                             <div
