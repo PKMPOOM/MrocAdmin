@@ -1,7 +1,17 @@
-import { Button, Form, InputNumber, Select, Typography } from "antd";
-import { useState } from "react";
+import {
+  Button,
+  Form,
+  InputNumber,
+  Select,
+  Tooltip,
+  Tour,
+  TourProps,
+  Typography,
+} from "antd";
+import { useState, useRef, useEffect } from "react";
 import GenerateSurveyModal from "./GenerateSurveyModal";
 import GenerativeQuestionPreview from "./QuestionPreview";
+import { QuestionCircleOutlined } from "@ant-design/icons";
 import { GenQuestionList, GenQuestionListSchema } from "./type";
 const { Title } = Typography;
 
@@ -21,7 +31,55 @@ const SmartCreatePage = () => {
   const [IsStreaming, setIsStreaming] = useState(false);
   const [isStreamingDone, setisStreamingDone] = useState(false);
   const [IsCreateSurveyModalOpen, setIsCreateSurveyModalOpen] = useState(false);
+  const [TourOpen, setTourOpen] = useState(false);
   const [form] = Form.useForm();
+
+  const ref1 = useRef(null);
+  const ref2 = useRef(null);
+  const ref3 = useRef(null);
+  const ref4 = useRef(null);
+
+  const steps: TourProps["steps"] = [
+    {
+      title: "Select AI model",
+      description: "Choose the AI model you want to use.",
+      target: () => ref1.current,
+      style: {
+        width: "300px",
+      },
+    },
+    {
+      title: "Question amount",
+      description: "Select the number of questions you want to generate.",
+      target: () => ref2.current,
+      style: {
+        width: "500px",
+      },
+    },
+    {
+      title: "Make a wish!",
+      description: "Click the button to start generating questions.",
+      target: () => ref3.current,
+    },
+    {
+      title: "Use this survey",
+      description:
+        "Once you are happy with the questions, click here to build the survey using the generated questions.",
+      cover: (
+        <img
+          alt="tour.png"
+          src="https://gfuwezskflleiadzwihe.supabase.co/storage/v1/object/sign/system/tourImg1.png?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJzeXN0ZW0vdG91ckltZzEucG5nIiwiaWF0IjoxNzE5MjkxMjc2LCJleHAiOjE3MjcwNjcyNzZ9.7TcvXmFwcMduYP29krO8_nnjX7eMimmDPzSK4nqKyPs&t=2024-06-25T04%3A54%3A38.028Z"
+        />
+      ),
+      target: () => ref4.current,
+    },
+  ];
+
+  useEffect(() => {
+    localStorage.getItem("tour") === "true"
+      ? setTourOpen(false)
+      : setTourOpen(true);
+  }, []);
 
   const generateStreamData = async (
     promptString: string,
@@ -99,15 +157,23 @@ const SmartCreatePage = () => {
   };
 
   const onCreateNewSurvey = () => {
-    // todo: open modal
-    // todo: modal text input for survey name and status selection
     setIsCreateSurveyModalOpen(true);
   };
 
   return (
     <div className=" tw-px-6 tw-flex tw-flex-col tw-gap-4 tw-h-[calc(100vh-64px)] tw-relative  ">
-      <div className="tw-flex tw-flex-row tw-items-center tw-justify-between ">
+      <div className="tw-flex tw-flex-row tw-items-start tw-justify-start tw-gap-2  ">
         <Title level={3}>Generative create</Title>
+        <Tooltip title="Help">
+          <Button
+            shape="circle"
+            icon={<QuestionCircleOutlined />}
+            onClick={() => {
+              setTourOpen(true);
+            }}
+            type="dashed"
+          ></Button>
+        </Tooltip>
       </div>
       <div className=" tw-flex tw-flex-row tw-gap-4  tw-h-full tw-max-w-full tw-justify-center ">
         <div className="  tw-flex tw-flex-col tw-w-4/5 tw-gap-2 tw-items-center  tw-h-[calc(100vh-125px)] tw-p-2 tw-overflow-auto">
@@ -137,37 +203,41 @@ const SmartCreatePage = () => {
               >
                 <div className=" tw-flex tw-flex-col tw-justify-between tw-items-start tw-mb-4">
                   <div className=" tw-flex tw-gap-2 tw-w-full ">
-                    <Form.Item<formSchema>
-                      label={"AI model"}
-                      name={"model"}
-                      rules={[
-                        {
-                          required: true,
-                          message: "Please select a model",
-                        },
-                      ]}
-                    >
-                      <Select
-                        defaultValue="gpt-3.5-turbo"
-                        options={[
-                          { label: "GPT-3.5 turbo", value: "gpt-3.5-turbo" },
-                          { label: "GPT-4o", value: "gpt-4o" },
+                    <div ref={ref1}>
+                      <Form.Item<formSchema>
+                        label={"AI model"}
+                        name={"model"}
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please select a model",
+                          },
                         ]}
-                      />
-                    </Form.Item>
-                    <Form.Item<formSchema>
-                      label={"Question amount"}
-                      name={"Qamount"}
-                      rules={[
-                        {
-                          required: true,
-                        },
-                      ]}
-                    >
-                      <InputNumber defaultValue={3} />
-                    </Form.Item>
+                      >
+                        <Select
+                          options={[
+                            { label: "GPT-3.5 turbo", value: "gpt-3.5-turbo" },
+                            { label: "GPT-4o", value: "gpt-4o" },
+                          ]}
+                        />
+                      </Form.Item>
+                    </div>
+                    <div ref={ref2}>
+                      <Form.Item<formSchema>
+                        label={"Question amount"}
+                        name={"Qamount"}
+                        rules={[
+                          {
+                            required: true,
+                          },
+                        ]}
+                      >
+                        <InputNumber />
+                      </Form.Item>
+                    </div>
 
                     <Button
+                      ref={ref3}
                       style={{ marginLeft: "auto" }}
                       onClick={() => {
                         form.validateFields().then(() => {
@@ -214,7 +284,7 @@ const SmartCreatePage = () => {
 
               {isStreamingDone && !IsStreaming && (
                 <div className=" tw-flex tw-my-3 tw-w-full tw-justify-center">
-                  <Button onClick={onCreateNewSurvey} type="primary">
+                  <Button ref={ref4} onClick={onCreateNewSurvey} type="primary">
                     Use this survey
                   </Button>
                 </div>
@@ -223,6 +293,15 @@ const SmartCreatePage = () => {
           </div>
         </div>
       </div>
+      <Tour
+        open={TourOpen}
+        onClose={() => {
+          localStorage.setItem("tour", "true");
+          setTourOpen(false);
+        }}
+        steps={steps}
+      />
+
       <GenerateSurveyModal
         questionData={parsedData}
         topic={Topic}
