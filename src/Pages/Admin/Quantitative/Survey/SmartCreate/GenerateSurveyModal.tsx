@@ -1,11 +1,11 @@
 import { Button, Form, Input, Modal, Select } from "antd";
 import { useEffect, useState } from "react";
+import { createNewSurveyFromGenerted } from "./api";
 import {
   GenQuestionList,
   SubmitPayload,
   SurveyStatusSelectOptions,
 } from "./type";
-import { createNewSurveyFromGenerted } from "./api";
 
 type Props = {
   questionData: GenQuestionList[];
@@ -47,11 +47,37 @@ const GenerateSurveyModal = ({
   const onCreate = async (e: formSchema) => {
     setIsLoading(true);
 
+    const formattedQuestionData: GenQuestionList[] = questionData.map(
+      (item, Qindex) => {
+        return {
+          label: item.label,
+          answer: item.answer.map((item, Andex) => {
+            const newAnswerData = [
+              {
+                id: `id-${Qindex}${Andex}`,
+                type: "paragraph",
+                props: {
+                  textColor: "default",
+                  backgroundColor: "default",
+                  textAlignment: "left",
+                },
+                content: [{ type: "text", text: item, styles: {} }],
+                children: [],
+              },
+            ];
+
+            return JSON.stringify(newAnswerData);
+          }),
+          type: item.type,
+        };
+      }
+    );
+
     // api call return survey id
     const payload: SubmitPayload = {
       name: e.name,
       status: e.surveyStatus,
-      questionData,
+      questionData: formattedQuestionData,
     };
 
     const response = await createNewSurveyFromGenerted(payload);

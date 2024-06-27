@@ -1,0 +1,42 @@
+.tox-tinymce-inline {
+  z-index: 1600 !important;
+  top: 20px;
+}
+.tox-tinymce {
+  height: fit-content;
+  border: none !important;
+}
+
+.mce-content-body {
+  padding: 4px;
+}
+
+.tox.tox-tinymce-inline .tox-editor-header {
+  background-color: #fff;
+  border: 1px solid #eee;
+  border-radius: 0px;
+  overflow: hidden;
+  box-shadow: none;
+}
+
+*[contentEditable="true"]:hover,
+*[contentEditable="true"]:focus {
+  outline: 1px solid #1976d2;
+  border-radius: 4px;
+}
+
+.bn-editor {
+  outline: none;
+  padding-inline: 4px;
+  font-size: small;
+  height: 100%;
+  display: flex;
+  align-items: center;
+
+  --N800: #172b4d;
+  --N40: #dfe1e6;
+}
+
+.bn-container[data-theming-css-demo] .bn-editor * {
+  color: blue;
+}

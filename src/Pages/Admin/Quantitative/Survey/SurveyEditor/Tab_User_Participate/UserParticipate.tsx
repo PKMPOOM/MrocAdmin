@@ -4,14 +4,23 @@ import { useNavigate } from "react-router-dom";
 import { userparticipatingSubtab } from "../../../../../../Interface/SurveyEditorInterface";
 import Tab_UserParticipatingInviteUser from "./Subtab_Invite_user/Subtab_Invite_user";
 import { useSurveyEditorStore } from "~/store/useSurveyEditorStore";
+import { useShallow } from "zustand/react/shallow";
 
 function UserParticipate_Tabs() {
   const navigate = useNavigate();
-  const [activeUserparticipatingSubtab, setActiveUserparticipatingSubtab] =
-    useSurveyEditorStore((state) => [
+  const [
+    activeUserparticipatingSubtab,
+    setActiveUserparticipatingSubtab,
+    surveyMeta,
+  ] = useSurveyEditorStore(
+    useShallow((state) => [
       state.activeUserparticipatingSubtab,
       state.setActiveUserparticipatingSubtab,
-    ]);
+      state.surveyMeta,
+    ])
+  );
+
+  console.log(surveyMeta);
 
   const items = [
     {

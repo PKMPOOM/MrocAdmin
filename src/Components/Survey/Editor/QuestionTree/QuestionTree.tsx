@@ -1,8 +1,8 @@
 import {
   HolderOutlined,
+  LoadingOutlined,
   PlusOutlined,
   QuestionCircleOutlined,
-  LoadingOutlined,
 } from "@ant-design/icons";
 import {
   Button,
@@ -18,13 +18,12 @@ import {
 import { produce } from "immer";
 import { Draggable, Droppable } from "react-beautiful-dnd";
 import { useShallow } from "zustand/react/shallow";
-import "../../../../App.css";
-import { QueryResponse } from "../../../../Interface/SurveyEditorInterface";
-import { useAddPageMutation, useDeleteMultiplePagesMutation } from "./page.api";
 import {
   TSelectedQuestion,
   useSurveyEditorStore,
 } from "~/store/useSurveyEditorStore";
+import "../../../../App.css";
+import { useAddPageMutation, useDeleteMultiplePagesMutation } from "./page.api";
 
 const { Text } = Typography;
 const { useToken } = theme;
@@ -49,8 +48,16 @@ const QuestionTree = () => {
       state.setSelectedTree,
     ])
   );
+  const { token } = useToken();
+  const { trigger: addNewPageMutation } = useAddPageMutation(surveyMeta);
+  const { trigger: delteSelectedPages, isMutating } =
+    useDeleteMultiplePagesMutation(surveyMeta, SelectedTree);
 
-  const { questionlist } = surveyData || ({} as QueryResponse);
+  if (!surveyData) {
+    return null;
+  }
+
+  const { questionlist } = surveyData;
 
   const scrollTo = (id: string) => {
     const section = document.querySelector(id);
@@ -61,11 +68,6 @@ const QuestionTree = () => {
       });
     }
   };
-
-  const { token } = useToken();
-  const { trigger: addNewPageMutation } = useAddPageMutation(surveyMeta);
-  const { trigger: delteSelectedPages, isMutating } =
-    useDeleteMultiplePagesMutation(surveyMeta, SelectedTree);
 
   const deleteSelectedPages = async () => {
     await delteSelectedPages();

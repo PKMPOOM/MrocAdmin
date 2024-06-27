@@ -3,14 +3,20 @@ import { Checkbox, Input, Radio, Typography } from "antd";
 const { Text } = Typography;
 // import PageBreak from "../../QuestionType/PageBreak";
 // import ICSlider from "../../QuestionType/ICSlider";
+import { Block } from "@blocknote/core";
+import { BlockNoteView } from "@blocknote/mantine";
+import { useCreateBlockNote } from "@blocknote/react";
+import React from "react";
 import { FaFileUpload } from "react-icons/fa";
-import { Question } from "../../../../Interface/SurveyEditorInterface";
+import { useShallow } from "zustand/react/shallow";
+import { useSurveyEditorStore } from "~/store/useSurveyEditorStore";
+import {
+  Question,
+  TQuestionType,
+} from "../../../../Interface/SurveyEditorInterface";
 import ICSlider from "../../../QuestionType/IcSlider";
 import PageBreak from "../../../QuestionType/PageBreak";
 import QuestionLogic from "./Sub_components/QuestionLogic";
-import { useShallow } from "zustand/react/shallow";
-import React from "react";
-import { useSurveyEditorStore } from "~/store/useSurveyEditorStore";
 
 type QuestionPreviewProps = {
   pageSize: number;
@@ -75,7 +81,12 @@ function Question_Preview({ pageSize, pIndex, qIndex }: QuestionPreviewProps) {
                         : "tw-flex-col "
                     }`}
                   >
-                    <Radio>{answer.label}</Radio>
+                    <Radio checked={false}>
+                      <AnswerDisplayer
+                        answer={answer.label}
+                        QuestionType={question.type}
+                      />
+                    </Radio>
                     {answer.openend ? (
                       <Input
                         placeholder={"please answer"}
@@ -94,14 +105,19 @@ function Question_Preview({ pageSize, pIndex, qIndex }: QuestionPreviewProps) {
               {question.type === "multi_select" &&
                 question.answers.map((answer, index) => (
                   <div key={index}>
-                    <Checkbox>{answer.label}</Checkbox>
+                    <Checkbox checked={false}>
+                      <AnswerDisplayer
+                        answer={answer.label}
+                        QuestionType={question.type}
+                      />
+                    </Checkbox>
                   </div>
                 ))}
 
               {question.type === "slider" && (
                 <ICSlider scale={question.answers} />
               )}
-              
+
               {question.type === "text_area" && (
                 <Input.TextArea placeholder="please answer" />
               )}
@@ -118,5 +134,30 @@ function Question_Preview({ pageSize, pIndex, qIndex }: QuestionPreviewProps) {
       );
   }
 }
+
+type Props = {
+  answer: string;
+  QuestionType: TQuestionType;
+};
+const AnswerDisplayer = ({ answer }: Props) => {
+  const parsedBlock: Block[] = JSON.parse(answer);
+  const editor = useCreateBlockNote({
+    initialContent: parsedBlock,
+    trailingBlock: false,
+  });
+
+  return (
+    <BlockNoteView
+      style={{
+        width: "100%",
+        fontSize: 1,
+        height: "100%",
+      }}
+      editable={false}
+      theme={"light"}
+      editor={editor}
+    ></BlockNoteView>
+  );
+};
 
 export default React.memo(Question_Preview);

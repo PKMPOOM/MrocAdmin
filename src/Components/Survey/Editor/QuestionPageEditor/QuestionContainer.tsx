@@ -1,7 +1,7 @@
 import { DeleteTwoTone, QuestionCircleOutlined } from "@ant-design/icons";
 import { Button, Popconfirm, Typography } from "antd";
 import { produce } from "immer";
-import React from "react";
+import React, { useEffect } from "react";
 import { useShallow } from "zustand/react/shallow";
 import {
   Pages,
@@ -24,13 +24,23 @@ type PageProps = {
 
 //todo add delete page mutation
 function PageContainer({ pages, pIndex }: PageProps) {
-  const [activeQuestion, surveyMeta] = useSurveyEditorStore(
-    useShallow((state) => [state.activeQuestion, state.surveyMeta])
+  const [activeQuestion, surveyMeta, SetActiveQuestion] = useSurveyEditorStore(
+    useShallow((state) => [
+      state.activeQuestion,
+      state.surveyMeta,
+      state.SetActiveQuestion,
+    ])
   );
   const { notificationApi } = useAuth();
   const { trigger: UpdatePageHeaderMutation } =
     useUpdatePageHeaderMutation(surveyMeta);
   const { trigger: deleteSinglePage } = useDeleteSinglePageMutation(surveyMeta);
+
+  useEffect(() => {
+    if (pIndex === 0 && pages.questions[0]?.id) {
+      SetActiveQuestion(0, 0, pages.questions[0].id);
+    }
+  }, []);
 
   return (
     <div
