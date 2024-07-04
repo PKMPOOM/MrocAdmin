@@ -1,3 +1,4 @@
+import { Block } from "@blocknote/core";
 import { produce } from "immer";
 import useSWRMutation from "swr/mutation";
 import { v4 as uuidv4 } from "uuid";
@@ -8,6 +9,30 @@ import { TSurveyMeta } from "~/store/useSurveyEditorStore";
 import { appAPI } from "~/utils/fetchUtils";
 
 export const answerAPI = new appAPI("/answer");
+
+const createAnswerLabel = (label: string) => {
+  const newAnswerTemplate: Block[] = [
+    {
+      id: "id-00",
+      type: "paragraph",
+      props: {
+        textColor: "default",
+        backgroundColor: "default",
+        textAlignment: "left",
+      },
+      content: [
+        {
+          type: "text",
+          text: label,
+          styles: {},
+        },
+      ],
+      children: [],
+    },
+  ];
+
+  return JSON.stringify(newAnswerTemplate);
+};
 
 type addAnswerMutationProps = {
   pIndex: number;
@@ -25,6 +50,7 @@ export const addAnswerMutation = (
     return await answerAPI.post(null, {
       qID: qID,
       aID: newAnswerID,
+      label: createAnswerLabel("New Answer"),
     });
   };
 
@@ -44,7 +70,7 @@ export const addAnswerMutation = (
         const { questionlist } = draftState;
         const newAnswer: Answer = {
           ...answerTemplate,
-          label: `New answer`,
+          label: createAnswerLabel("New Answer"),
           key: "",
           id: newAnswerID,
         };
@@ -77,8 +103,6 @@ export const updateAnswerLabel = (surveyMeta: TSurveyMeta) => {
     _: string,
     { arg }: { arg: useUpdateAnswerLabelArgs }
   ) => {
-    // return throwMockError(0);
-
     return answerAPI.put(`/${arg.aID}`, {
       label: arg.label,
     });

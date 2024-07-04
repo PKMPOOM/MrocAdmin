@@ -31,6 +31,7 @@
     "@types/react-beautiful-dnd": "^13.1.4",
     "@types/tinymce": "^4.6.6",
     "@types/uuid": "^9.0.2",
+    "ai": "^3.2.16",
     "antd": "^5.15.0",
     "axios": "^1.4.0",
     "chart.js": "^4.3.0",

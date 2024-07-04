@@ -8,19 +8,13 @@ import { useShallow } from "zustand/react/shallow";
 
 function UserParticipate_Tabs() {
   const navigate = useNavigate();
-  const [
-    activeUserparticipatingSubtab,
-    setActiveUserparticipatingSubtab,
-    surveyMeta,
-  ] = useSurveyEditorStore(
-    useShallow((state) => [
-      state.activeUserparticipatingSubtab,
-      state.setActiveUserparticipatingSubtab,
-      state.surveyMeta,
-    ])
-  );
-
-  console.log(surveyMeta);
+  const [activeUserparticipatingSubtab, setActiveUserparticipatingSubtab] =
+    useSurveyEditorStore(
+      useShallow((state) => [
+        state.activeUserparticipatingSubtab,
+        state.setActiveUserparticipatingSubtab,
+      ])
+    );
 
   const items = [
     {

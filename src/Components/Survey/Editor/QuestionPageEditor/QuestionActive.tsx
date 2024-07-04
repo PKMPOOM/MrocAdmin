@@ -1,14 +1,23 @@
 import { EllipsisOutlined, PlusOutlined } from "@ant-design/icons";
+import { useCreateBlockNote } from "@blocknote/react";
 import type { MenuProps } from "antd";
-import { Button, Dropdown, Form, Input, Typography } from "antd";
+import { Button, Dropdown, Form, Typography } from "antd";
 import { produce } from "immer";
 import { debounce } from "lodash";
-import React, { ChangeEvent, useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
+import { useAuth } from "~/context/Auth/AuthContext";
+import { useGenerativeQuestion } from "~/src/Hooks/Generative/Question/useGenerativeQuestion";
+import { useSurveyEditorStore } from "~/store/useSurveyEditorStore";
 import {
   QueryResponse,
   Question,
 } from "../../../../Interface/SurveyEditorInterface";
+import {
+  CustomBlockNote,
+  customSchema,
+  getInitBlock,
+} from "../../../Global/CustomEditor/BlockNoteCustomEditor";
 import PageBreak from "../../../QuestionType/PageBreak";
 import { addAnswerMutation } from "../QuestionTree/answer.api";
 import {
@@ -17,8 +26,7 @@ import {
 } from "../QuestionTree/question.api";
 import Answer from "./Answer";
 import QuestionLogic from "./Sub_components/QuestionLogic";
-import { useAuth } from "~/context/Auth/AuthContext";
-import { useSurveyEditorStore } from "~/store/useSurveyEditorStore";
+
 const { Text } = Typography;
 
 const items: MenuProps["items"] = [
@@ -40,14 +48,14 @@ const items: MenuProps["items"] = [
 ];
 
 type QuestionProps = {
-  pageID: string;
   pageSize: number;
   question: Question;
+  pageID: string;
   pIndex: number;
   qIndex: number;
 };
 
-function Question_Active({
+function QuestionActive({
   pageID,
   pageSize,
   question,
@@ -56,22 +64,15 @@ function Question_Active({
 }: QuestionProps) {
   const [questionFrom] = Form.useForm();
   const { notificationApi } = useAuth();
-  const [
-    activeQ,
-    setActiveQ,
-    SetSideTabActiveKey,
-    surveyMeta,
-    setSurveyFetchingStatus,
-  ] = useSurveyEditorStore(
+  const [activeQ, surveyMeta, setSurveyFetchingStatus] = useSurveyEditorStore(
     useShallow((state) => [
       state.activeQuestion,
-      state.SetActiveQuestion,
-      state.SetSideTabActiveKey,
       state.surveyMeta,
       state.setSurveyFetchingStatus,
     ])
   );
   const [SavedText, setSavedText] = useState("");
+
   const isLastIndex = pageSize - 1 === qIndex;
 
   const { trigger: deleteQuestion } = useDeleteQuestionMutation(surveyMeta);
@@ -82,6 +83,15 @@ function Question_Active({
     qID: question.id,
   });
 
+  const { useEventSource } = useGenerativeQuestion();
+  const { StartEventSource, rawData } = useEventSource();
+
+  const editor = useCreateBlockNote({
+    schema: customSchema,
+    initialContent: getInitBlock(question.label),
+    trailingBlock: false,
+  });
+
   useEffect(() => {
     setSavedText(question.label);
     questionFrom.setFieldsValue({
@@ -89,12 +99,25 @@ function Question_Active({
     });
   }, []);
 
+  useEffect(() => {
+    if (editor) {
+      const currentBlock = editor.getTextCursorPosition().block;
+      if (currentBlock && rawData !== "") {
+        editor.updateBlock(currentBlock, {
+          content: [{ type: "text", text: rawData, styles: {} }],
+        });
+      }
+    }
+  }, [rawData]);
+
   const debouncedApiCall = useCallback(
     debounce(async (Mutationfunc: () => void) => Mutationfunc(), 1500),
     []
   );
 
-  const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+  const handleChange = () => {
+    const JSONContent = JSON.stringify(editor.document);
+
     debouncedApiCall(() => {
       setSurveyFetchingStatus({
         isFetching: true,
@@ -102,7 +125,7 @@ function Question_Active({
       });
       updateQuestionLabel(
         {
-          label: e.target.value,
+          label: JSONContent,
           qID: question.id,
         },
         {
@@ -122,7 +145,7 @@ function Question_Active({
               currentData,
               (draftState: QueryResponse) => {
                 const { questionlist } = draftState;
-                questionlist[pIndex].questions[qIndex].label = e.target.value;
+                questionlist[pIndex].questions[qIndex].label = JSONContent;
               }
             );
             return nextState;
@@ -238,17 +261,23 @@ function Question_Active({
           </div>
         </div>
         <div>
-          <Form.Item style={{ marginBottom: 0 }} name="question_text">
-            <Input.TextArea
-              autoFocus={true}
-              onFocus={() => {
-                SetSideTabActiveKey("Edit");
-                setActiveQ(pIndex, qIndex, question.id);
+          <div className="tw-rounded-sm tw-flex tw-gap-1  tw-relative tw-items-center tw-min-h-8 ">
+            <CustomBlockNote
+              editor={editor}
+              handleChange={handleChange}
+              questionIndexData={{
+                pIndex,
+                qIndex,
+                questionID: question.id,
               }}
-              onChange={handleChange}
+              generativeFeature={{
+                StartEventSource,
+                rawData,
+              }}
             />
-          </Form.Item>
+          </div>
         </div>
+
         {question.answers?.map((answer, aIndex) => (
           <Answer
             key={answer.id}
@@ -281,4 +310,4 @@ function Question_Active({
   );
 }
 
-export default React.memo(Question_Active);
+export default React.memo(QuestionActive);

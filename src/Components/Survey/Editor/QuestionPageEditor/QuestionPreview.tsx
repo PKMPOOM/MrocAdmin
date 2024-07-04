@@ -3,12 +3,16 @@ import { Checkbox, Input, Radio, Typography } from "antd";
 const { Text } = Typography;
 // import PageBreak from "../../QuestionType/PageBreak";
 // import ICSlider from "../../QuestionType/ICSlider";
-import { Block } from "@blocknote/core";
 import { BlockNoteView } from "@blocknote/mantine";
 import { useCreateBlockNote } from "@blocknote/react";
 import React from "react";
 import { FaFileUpload } from "react-icons/fa";
 import { useShallow } from "zustand/react/shallow";
+import {
+  CustomBlockNote,
+  customSchema,
+  getInitBlock,
+} from "~/component/Global/CustomEditor/BlockNoteCustomEditor";
 import { useSurveyEditorStore } from "~/store/useSurveyEditorStore";
 import {
   Question,
@@ -25,7 +29,7 @@ type QuestionPreviewProps = {
   qIndex: number;
 };
 
-function Question_Preview({ pageSize, pIndex, qIndex }: QuestionPreviewProps) {
+function QuestionPreview({ pageSize, pIndex, qIndex }: QuestionPreviewProps) {
   const isLastIndex = pageSize - 1 === qIndex;
   const [setActiveQ, question] = useSurveyEditorStore(
     useShallow((state) => [
@@ -60,7 +64,8 @@ function Question_Preview({ pageSize, pIndex, qIndex }: QuestionPreviewProps) {
               }}
             />
             <div className="tw-flex tw-gap-5">
-              <Text style={{ fontSize: 16 }}>{question.label}</Text>
+              <QuestionDisplayer questionData={question} />
+              {/* <Text style={{ fontSize: 16 }}>{question.label}</Text> */}
               <QuestionLogic
                 questiontype={question.type}
                 forcerequired={question.forcequestionresponse}
@@ -139,10 +144,10 @@ type Props = {
   answer: string;
   QuestionType: TQuestionType;
 };
+
 const AnswerDisplayer = ({ answer }: Props) => {
-  const parsedBlock: Block[] = JSON.parse(answer);
   const editor = useCreateBlockNote({
-    initialContent: parsedBlock,
+    initialContent: getInitBlock(answer),
     trailingBlock: false,
   });
 
@@ -160,4 +165,32 @@ const AnswerDisplayer = ({ answer }: Props) => {
   );
 };
 
-export default React.memo(Question_Preview);
+type QuestionDisplayerProps = {
+  questionData: Question;
+};
+
+const QuestionDisplayer = ({ questionData }: QuestionDisplayerProps) => {
+  try {
+    const editor = useCreateBlockNote({
+      schema: customSchema,
+      initialContent: getInitBlock(questionData.label),
+      trailingBlock: false,
+    });
+
+    return (
+      <CustomBlockNote
+        editor={editor}
+        handleChange={() => {}}
+        questionIndexData={{
+          pIndex: 0,
+          qIndex: 0,
+          questionID: "0",
+        }}
+      />
+    );
+  } catch (error) {
+    return <Text>{questionData.label}</Text>;
+  }
+};
+
+export default React.memo(QuestionPreview);

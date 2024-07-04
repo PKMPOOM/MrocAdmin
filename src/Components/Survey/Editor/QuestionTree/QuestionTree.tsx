@@ -24,6 +24,7 @@ import {
 } from "~/store/useSurveyEditorStore";
 import "../../../../App.css";
 import { useAddPageMutation, useDeleteMultiplePagesMutation } from "./page.api";
+import { getTextFromBlock } from "~/src/Hooks/Utils/getTextFromBlock";
 
 const { Text } = Typography;
 const { useToken } = theme;
@@ -332,7 +333,8 @@ const QuestionTree = () => {
                       <div className="tw-flex tw-flex-col tw-gap-2">
                         {pages.questions.map((question, qIndex) => {
                           const isQuestionActive =
-                            activeQuestion.id === question.id;
+                            activeQuestion.page === pIndex &&
+                            activeQuestion.question === qIndex;
 
                           const isQuestionSelected = SelectedTree[
                             pages.id
@@ -340,6 +342,10 @@ const QuestionTree = () => {
                             (element) =>
                               element.id === question.id &&
                               element.index === question.index
+                          );
+
+                          const questionLabel = getTextFromBlock(
+                            question.label
                           );
 
                           switch (question.type) {
@@ -482,8 +488,8 @@ const QuestionTree = () => {
                                           }}
                                           ellipsis={true}
                                         >
-                                          <span title={question.label}>
-                                            {question.label}
+                                          <span title={questionLabel}>
+                                            {questionLabel}
                                           </span>
                                         </Text>
                                         <div

@@ -202,49 +202,47 @@ function OpenEnd({
   ];
 
   return (
-    <div>
-      <div
-        style={{
-          outline: "rgb(223, 223, 223) solid 1px",
-          display: "flex",
-          flexDirection: "row",
-          borderRadius: "6px",
-          paddingInlineStart: 8,
-          paddingInlineEnd: 8,
-          height: "100%",
-        }}
-        className="tw-flex tw-flex-row tw-items-center "
-      >
-        <Tooltip placement="left" title="Open end">
-          <Checkbox
-            checked={useOpenEnd}
-            onChange={(e) => {
-              onChange({
-                use: e.target.checked,
-              });
-            }}
-          />
-        </Tooltip>
-        {useOpenEnd ? (
-          <Dropdown
-            onOpenChange={handleOpenChange}
-            open={open}
-            placement="bottom"
-            menu={{
-              items: dropdownItems,
-              onClick: ({ key }) => {
-                onMenuClick(key);
-              },
-            }}
-          >
-            <div className="tw-cursor-pointer tw-rounded tw-flex tw-justify-center tw-ml-1 hover:tw-bg-slate-100">
-              <FaAsterisk
-                color={forceOpenEnd ? token.colorError : "rgba(0,0,0,.88)"}
-              />
-            </div>
-          </Dropdown>
-        ) : null}
-      </div>
+    <div
+      style={{
+        outline: "rgb(223, 223, 223) solid 1px",
+        display: "flex",
+        flexDirection: "row",
+        borderRadius: "6px",
+        paddingInlineStart: 8,
+        paddingInlineEnd: 8,
+        height: "32px",
+      }}
+      className="tw-flex tw-flex-row tw-items-center "
+    >
+      <Tooltip placement="left" title="Open end">
+        <Checkbox
+          checked={useOpenEnd}
+          onChange={(e) => {
+            onChange({
+              use: e.target.checked,
+            });
+          }}
+        />
+      </Tooltip>
+      {useOpenEnd ? (
+        <Dropdown
+          onOpenChange={handleOpenChange}
+          open={open}
+          placement="bottom"
+          menu={{
+            items: dropdownItems,
+            onClick: ({ key }) => {
+              onMenuClick(key);
+            },
+          }}
+        >
+          <div className="tw-cursor-pointer tw-rounded tw-flex tw-justify-center tw-ml-1 hover:tw-bg-slate-100">
+            <FaAsterisk
+              color={forceOpenEnd ? token.colorError : "rgba(0,0,0,.88)"}
+            />
+          </div>
+        </Dropdown>
+      ) : null}
     </div>
   );
 }

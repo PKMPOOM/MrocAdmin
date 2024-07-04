@@ -175,6 +175,7 @@ export interface QuestionCard {
   label: string;
   value: TQuestionType;
   icon: ReactNode;
+  available: boolean;
 }
 
 export type VariableTypes = {

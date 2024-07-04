@@ -3,7 +3,6 @@ import {
   DeleteTwoTone,
   LoadingOutlined,
 } from "@ant-design/icons";
-import { Block } from "@blocknote/core";
 import "@blocknote/core/fonts/inter.css";
 import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
@@ -12,6 +11,8 @@ import { Checkbox, Col, Radio, Row, theme } from "antd";
 import { produce } from "immer";
 import { debounce } from "lodash";
 import { useCallback, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
+import { getInitBlock } from "~/component/Global/CustomEditor/BlockNoteCustomEditor";
 import { DebounceDelay } from "~/src/Constant/DebounceDelay";
 import { useSurveyEditorStore } from "~/store/useSurveyEditorStore";
 import { useAuth } from "../../../../Context/Auth/AuthContext";
@@ -36,7 +37,12 @@ type AnswerProps = {
   aIndex: number;
 };
 
-type ValidationStatus = "success" | "warning" | "error" | "validating" | "";
+export type ValidationStatus =
+  | "success"
+  | "warning"
+  | "error"
+  | "validating"
+  | "";
 
 function Answer({
   questionType,
@@ -47,10 +53,8 @@ function Answer({
 }: AnswerProps) {
   const { notificationApi } = useAuth();
   const [surveyMeta, setSurveyFetchingStatus] = useSurveyEditorStore(
-    (state) => [state.surveyMeta, state.setSurveyFetchingStatus]
+    useShallow((state) => [state.surveyMeta, state.setSurveyFetchingStatus])
   );
-  // const [SavedText, setSavedText] = useState("");
-  // const [Block, setBlock] = useState<Block[]>([]);
   const [ValidationStatus, setValidationStatus] =
     useState<ValidationStatus>("");
 
@@ -58,9 +62,8 @@ function Answer({
   const { trigger: deleteAnswer } = deleteAnswerMutation(surveyMeta);
   const { token } = theme.useToken();
 
-  const parsedBlock: Block[] = JSON.parse(answer.label);
   const editor = useCreateBlockNote({
-    initialContent: parsedBlock,
+    initialContent: getInitBlock(answer.label),
     trailingBlock: false,
   });
 
@@ -136,12 +139,12 @@ function Answer({
       <Row
         style={{
           display: "flex",
-          alignItems: "strech",
+          alignItems: "center",
         }}
         gutter={8}
       >
         <Col flex="auto">
-          <div className="tw-rounded-sm tw-flex tw-gap-1  tw-relative tw-items-center tw-h-8 ">
+          <div className="tw-rounded-sm tw-flex tw-gap-1  tw-relative  tw-items-center  ">
             {questionType === "single_select" && <Radio checked={false} />}
             {questionType === "multi_select" && <Checkbox checked={false} />}
 
@@ -151,7 +154,6 @@ function Answer({
               }}
               style={{
                 width: "100%",
-                fontSize: 1,
                 height: "100%",
               }}
               theme={"light"}
@@ -173,23 +175,6 @@ function Answer({
                 />
               )}
             </div>
-          </div>
-          <div>
-            {/* <Form.Item
-              style={{
-                marginBottom: 0,
-              }}
-              name={formName}
-              hasFeedback
-              validateStatus={ValidationStatus}
-            >
-              <Input
-                onFocus={() => {
-                  SetSideTabActiveKey("Edit");
-                }}
-                onChange={handleChange}
-              />
-            </Form.Item> */}
           </div>
         </Col>
         <div className="tw-flex tw-gap-1">
