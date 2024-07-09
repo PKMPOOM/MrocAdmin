@@ -1,72 +1,87 @@
-import { DeleteTwoTone } from "@ant-design/icons";
-import { Col, Form, Input, Row } from "antd";
-import { debounce } from "lodash";
-import { ChangeEvent, useCallback, useEffect, useState } from "react";
+import {
+  CheckCircleFilled,
+  DeleteTwoTone,
+  LoadingOutlined,
+} from "@ant-design/icons";
+import "@blocknote/core/fonts/inter.css";
+import { BlockNoteView } from "@blocknote/mantine";
+import "@blocknote/mantine/style.css";
+import { useCreateBlockNote } from "@blocknote/react";
+import { Checkbox, Col, Radio, Row, theme } from "antd";
 import { produce } from "immer";
+import { debounce } from "lodash";
+import { useCallback, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
+import { DebounceDelay } from "~/src/Constant/DebounceDelay";
 import { useSurveyEditorStore } from "~/store/useSurveyEditorStore";
 import { useAuth } from "../../../../Context/Auth/AuthContext";
 import {
   Answer as AnswerInterface,
   QueryResponse,
+  TQuestionType,
 } from "../../../../Interface/SurveyEditorInterface";
 import {
   deleteAnswerMutation,
   updateAnswerLabel as useUpdateAnswerLabel,
 } from "../QuestionTree/answer.api";
+import "./Sub_components/inlineEditor.css";
 import OpenEnd from "./Sub_components/OpenEnd";
-import { DebounceDelay } from "~/src/Constant/DebounceDelay";
+import { getInitBlock } from "~/component/Global/CustomEditor/utils";
 
 type AnswerProps = {
   formInstance: any;
-  questionType: string;
+  questionType: TQuestionType;
   answer: AnswerInterface;
   pIndex: number;
   qIndex: number;
   aIndex: number;
 };
 
-type ValidationStatus = "success" | "warning" | "error" | "validating" | "";
+export type ValidationStatus =
+  | "success"
+  | "warning"
+  | "error"
+  | "validating"
+  | "";
 
 function Answer({
   questionType,
   answer,
   pIndex,
   qIndex,
-  aIndex,
-  formInstance,
+  aIndex, // formInstance,
 }: AnswerProps) {
   const { notificationApi } = useAuth();
   const [surveyMeta, setSurveyFetchingStatus] = useSurveyEditorStore(
-    (state) => [state.surveyMeta, state.setSurveyFetchingStatus]
+    useShallow((state) => [state.surveyMeta, state.setSurveyFetchingStatus])
   );
-
-  const [SavedText, setSavedText] = useState("");
   const [ValidationStatus, setValidationStatus] =
     useState<ValidationStatus>("");
 
   const { trigger: updateAnswerLabel } = useUpdateAnswerLabel(surveyMeta);
   const { trigger: deleteAnswer } = deleteAnswerMutation(surveyMeta);
+  const { token } = theme.useToken();
 
-  const formName = `question_text_${aIndex}`;
-
-  useEffect(() => {
-    setSavedText(answer.label);
-    formInstance.setFieldsValue({
-      [formName]: answer.label,
-    });
-  }, []);
+  const editor = useCreateBlockNote({
+    initialContent: getInitBlock(answer.label),
+    trailingBlock: false,
+  });
 
   const SetSideTabActiveKey = useSurveyEditorStore(
     (state) => state.SetSideTabActiveKey
   );
 
   const debouncedApiCall = useCallback(
-    debounce(async (Mutationfunc: () => void) => Mutationfunc(), DebounceDelay),
+    debounce(async (Mutationfunc: () => void) => {
+      setValidationStatus("validating");
+      Mutationfunc();
+    }, DebounceDelay),
     []
   );
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setValidationStatus("");
+  const handleChange = async () => {
+    const JSONContent = JSON.stringify(editor.document);
+
     debouncedApiCall(async () => {
       setSurveyFetchingStatus({
         isFetching: true,
@@ -74,7 +89,7 @@ function Answer({
       });
       await updateAnswerLabel(
         {
-          label: e.target.value,
+          label: JSONContent,
           aID: answer.id,
         },
         {
@@ -83,9 +98,11 @@ function Answer({
               message: "Error",
               description: "Error updating question label",
             });
-            formInstance.setFieldsValue({
-              [formName]: SavedText,
-            });
+
+            // todo: rollback to previous state
+            // formInstance.setFieldsValue({
+            //   [formName]: SavedText,
+            // });
             setValidationStatus("error");
             setSurveyFetchingStatus({
               isFetching: false,
@@ -99,7 +116,7 @@ function Answer({
               (draftState: QueryResponse) => {
                 const { questionlist } = draftState;
                 questionlist[pIndex].questions[qIndex].answers[aIndex].label =
-                  e.target.value;
+                  JSONContent;
               }
             );
             return nextState;
@@ -122,27 +139,42 @@ function Answer({
       <Row
         style={{
           display: "flex",
-          alignItems: "strech",
+          alignItems: "center",
         }}
         gutter={8}
       >
         <Col flex="auto">
-          <div>
-            <Form.Item
-              style={{
-                marginBottom: 0,
+          <div className="tw-rounded-sm tw-flex tw-gap-1  tw-relative  tw-items-center  ">
+            {questionType === "single_select" && <Radio checked={false} />}
+            {questionType === "multi_select" && <Checkbox checked={false} />}
+
+            <BlockNoteView
+              onFocus={() => {
+                SetSideTabActiveKey("Edit");
               }}
-              name={formName}
-              hasFeedback
-              validateStatus={ValidationStatus}
-            >
-              <Input
-                onFocus={() => {
-                  SetSideTabActiveKey("Edit");
-                }}
-                onChange={handleChange}
-              />
-            </Form.Item>
+              style={{
+                width: "100%",
+                height: "100%",
+              }}
+              theme={"light"}
+              editor={editor}
+              linkToolbar={false}
+              filePanel={false}
+              sideMenu={false}
+              slashMenu={false}
+              tableHandles={false}
+              onChange={handleChange}
+            ></BlockNoteView>
+            <div className=" tw-absolute tw-right-4 tw-z-20 inset-0">
+              {ValidationStatus === "validating" && <LoadingOutlined />}
+              {ValidationStatus === "success" && (
+                <CheckCircleFilled
+                  style={{
+                    color: token.colorSuccess,
+                  }}
+                />
+              )}
+            </div>
           </div>
         </Col>
         <div className="tw-flex tw-gap-1">

@@ -50,7 +50,7 @@ function QuestionCard({
               message: "No page found",
             });
           } else {
-            addQuestionLastIndex(
+            await addQuestionLastIndex(
               {
                 type: value,
                 label: label,

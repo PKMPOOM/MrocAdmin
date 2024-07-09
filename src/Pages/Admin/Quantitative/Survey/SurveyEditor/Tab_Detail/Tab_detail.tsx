@@ -17,7 +17,7 @@ import {
   message,
 } from "antd";
 import type { RcFile } from "antd/es/upload";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../../../../Context/Auth/AuthContext";
 import { StatusOption } from "../../../../../../Interface/SurveyEditorInterface";
@@ -48,16 +48,33 @@ function Tab_detail() {
   const [icon, seticon] = useState<RcFile | null>();
   const [Loading, setLoading] = useState<boolean>(false);
   const [Saving, setSaving] = useState<boolean>(false);
-  const [SetSurveyEditorTabs, surveyMeta, surveyData] = useSurveyEditorStore(
-    (state) => [state.SetSurveyEditorTabs, state.surveyMeta, state.surveyData]
-  );
+  const [SetSurveyEditorTabs, surveyMeta, surveyData, setSurveyMeta] =
+    useSurveyEditorStore((state) => [
+      state.SetSurveyEditorTabs,
+      state.surveyMeta,
+      state.surveyData,
+      state.setSurveyMeta,
+    ]);
   const navigate = useNavigate();
   const { Axios, AuthUser, notificationApi } = useAuth();
 
-  // console.log(detail);
-
   const surveyID = surveyMeta.surveyID;
   const NewSurvey = surveyMeta.isCreateNew;
+
+  console.log(NewSurvey);
+  const { pathname } = window.location;
+  const path = pathname.split("/");
+  const lastPath = path[path.length - 1];
+
+  console.log(lastPath);
+
+  useEffect(() => {
+    setSurveyMeta({
+      isCreateNew: lastPath === "Newsurvey",
+      surveyID: "",
+      queryKey: "",
+    });
+  }, []);
 
   const handleAvatarUpload = (file: RcFile) => {
     // Check if file is an image

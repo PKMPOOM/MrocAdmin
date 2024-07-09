@@ -8,6 +8,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { VariableTypes } from "../../../../../../../Interface/SurveyEditorInterface";
 import { useAuth } from "../../../../../../../Context/Auth/AuthContext";
 import { useSurveyEditorStore } from "~/store/useSurveyEditorStore";
+import { useShallow } from "zustand/react/shallow";
 
 interface VariableContextType {
   IsModalOpen: boolean;
@@ -19,9 +20,9 @@ export const newVarModalContext = createContext<VariableContextType>(
 );
 
 function Subtab_Variables() {
-  const [surveyID] = useSurveyEditorStore((state) => [
-    state.surveyMeta.surveyID,
-  ]);
+  const [surveyID] = useSurveyEditorStore(
+    useShallow((state) => [state.surveyMeta.surveyID])
+  );
   const { Axios } = useAuth();
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {

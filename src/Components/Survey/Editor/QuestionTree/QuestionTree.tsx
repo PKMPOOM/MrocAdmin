@@ -1,8 +1,8 @@
 import {
   HolderOutlined,
+  LoadingOutlined,
   PlusOutlined,
   QuestionCircleOutlined,
-  LoadingOutlined,
 } from "@ant-design/icons";
 import {
   Button,
@@ -18,13 +18,13 @@ import {
 import { produce } from "immer";
 import { Draggable, Droppable } from "react-beautiful-dnd";
 import { useShallow } from "zustand/react/shallow";
-import "../../../../App.css";
-import { QueryResponse } from "../../../../Interface/SurveyEditorInterface";
-import { useAddPageMutation, useDeleteMultiplePagesMutation } from "./page.api";
 import {
   TSelectedQuestion,
   useSurveyEditorStore,
 } from "~/store/useSurveyEditorStore";
+import "../../../../App.css";
+import { useAddPageMutation, useDeleteMultiplePagesMutation } from "./page.api";
+import { getTextFromBlock } from "~/src/Hooks/Utils/getTextFromBlock";
 
 const { Text } = Typography;
 const { useToken } = theme;
@@ -49,8 +49,16 @@ const QuestionTree = () => {
       state.setSelectedTree,
     ])
   );
+  const { token } = useToken();
+  const { trigger: addNewPageMutation } = useAddPageMutation(surveyMeta);
+  const { trigger: delteSelectedPages, isMutating } =
+    useDeleteMultiplePagesMutation(surveyMeta, SelectedTree);
 
-  const { questionlist } = surveyData || ({} as QueryResponse);
+  if (!surveyData) {
+    return null;
+  }
+
+  const { questionlist } = surveyData;
 
   const scrollTo = (id: string) => {
     const section = document.querySelector(id);
@@ -61,11 +69,6 @@ const QuestionTree = () => {
       });
     }
   };
-
-  const { token } = useToken();
-  const { trigger: addNewPageMutation } = useAddPageMutation(surveyMeta);
-  const { trigger: delteSelectedPages, isMutating } =
-    useDeleteMultiplePagesMutation(surveyMeta, SelectedTree);
 
   const deleteSelectedPages = async () => {
     await delteSelectedPages();
@@ -330,7 +333,8 @@ const QuestionTree = () => {
                       <div className="tw-flex tw-flex-col tw-gap-2">
                         {pages.questions.map((question, qIndex) => {
                           const isQuestionActive =
-                            activeQuestion.id === question.id;
+                            activeQuestion.page === pIndex &&
+                            activeQuestion.question === qIndex;
 
                           const isQuestionSelected = SelectedTree[
                             pages.id
@@ -338,6 +342,10 @@ const QuestionTree = () => {
                             (element) =>
                               element.id === question.id &&
                               element.index === question.index
+                          );
+
+                          const questionLabel = getTextFromBlock(
+                            question.label
                           );
 
                           switch (question.type) {
@@ -480,8 +488,8 @@ const QuestionTree = () => {
                                           }}
                                           ellipsis={true}
                                         >
-                                          <span title={question.label}>
-                                            {question.label}
+                                          <span title={questionLabel}>
+                                            {questionLabel}
                                           </span>
                                         </Text>
                                         <div

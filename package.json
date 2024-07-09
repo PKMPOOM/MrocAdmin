@@ -11,6 +11,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@blocknote/core": "^0.14.2",
+    "@blocknote/mantine": "^0.14.2",
+    "@blocknote/react": "^0.14.2",
     "@fontsource-variable/inter": "^5.0.16",
     "@fontsource-variable/josefin-sans": "^5.0.19",
     "@fontsource-variable/outfit": "^5.0.8",
@@ -24,10 +27,11 @@
     "@react-querybuilder/antd": "^6.5.4",
     "@tanstack/react-query": "^4.29.12",
     "@tanstack/react-query-devtools": "^4.29.12",
-    "@tinymce/tinymce-react": "^5.0.1",
+    "@tinymce/tinymce-react": "^5.1.1",
     "@types/react-beautiful-dnd": "^13.1.4",
     "@types/tinymce": "^4.6.6",
     "@types/uuid": "^9.0.2",
+    "ai": "^3.2.16",
     "antd": "^5.15.0",
     "axios": "^1.4.0",
     "chart.js": "^4.3.0",

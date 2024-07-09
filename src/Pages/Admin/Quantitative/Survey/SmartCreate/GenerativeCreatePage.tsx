@@ -1,3 +1,4 @@
+import { QuestionCircleOutlined } from "@ant-design/icons";
 import {
   Button,
   Form,
@@ -8,11 +9,10 @@ import {
   TourProps,
   Typography,
 } from "antd";
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import GenerateSurveyModal from "./GenerateSurveyModal";
-import GenerativeQuestionPreview from "./QuestionPreview";
-import { QuestionCircleOutlined } from "@ant-design/icons";
-import { GenQuestionList, GenQuestionListSchema } from "./type";
+import GenerativeQuestionPreview from "./GenerativeQuestionPreview";
+import { useGenerativeSurvey } from "~/src/Hooks/Generative";
 const { Title } = Typography;
 
 type SubmitType = "get-template" | "create-new";
@@ -25,11 +25,7 @@ type formSchema = {
 
 const SmartCreatePage = () => {
   const [SubmitType, setSubmitType] = useState<SubmitType>("get-template");
-  const [parsedData, setParsedData] = useState<GenQuestionList[]>([]);
   const [Topic, setTopic] = useState("Customer experience");
-  const [rawData, setRawData] = useState("");
-  const [IsStreaming, setIsStreaming] = useState(false);
-  const [isStreamingDone, setisStreamingDone] = useState(false);
   const [IsCreateSurveyModalOpen, setIsCreateSurveyModalOpen] = useState(false);
   const [TourOpen, setTourOpen] = useState(false);
   const [form] = Form.useForm();
@@ -38,7 +34,6 @@ const SmartCreatePage = () => {
   const ref2 = useRef(null);
   const ref3 = useRef(null);
   const ref4 = useRef(null);
-
   const steps: TourProps["steps"] = [
     {
       title: "Select AI model",
@@ -75,80 +70,32 @@ const SmartCreatePage = () => {
     },
   ];
 
+  const { useEventSource } = useGenerativeSurvey();
+
+  const {
+    IsStreaming,
+    StartEventSource,
+    isStreamingDone,
+    parsedData,
+    rawData,
+  } = useEventSource();
+
   useEffect(() => {
     localStorage.getItem("tour") === "true"
       ? setTourOpen(false)
       : setTourOpen(true);
   }, []);
 
-  const generateStreamData = async (
-    promptString: string,
-    questionAmount: number,
-    AImodel: string
-  ) => {
-    setRawData("");
-    setParsedData([]);
-    setIsStreaming(true);
-    setisStreamingDone(false);
-
-    const eventSource = new EventSource(
-      `${
-        import.meta.env.VITE_API_URL
-      }/generative/streaming/${promptString.replace(
-        / /g,
-        "_"
-      )}?Qamount=${questionAmount}&model=${AImodel}`,
-      {
-        withCredentials: true,
-      }
-    );
-
-    let data = "";
-
-    eventSource.onmessage = function (event) {
-      if (event.data === "[DONE]") {
-        setIsStreaming(false);
-        setisStreamingDone(true);
-        eventSource.close();
-      } else {
-        setRawData((prev) => prev + event.data);
-        data += event.data;
-
-        const endIndex = data.indexOf("}");
-        if (endIndex !== -1) {
-          const startIndex = data.indexOf("{");
-
-          const jsonObject = data.slice(startIndex, endIndex + 1); // Extract the JSON object
-          data = data.slice(endIndex + 1); // Remove the extracted JSON object from the accumulated data
-          setRawData(data); // remove the extracted JSON object from the accumulated data state
-
-          try {
-            const parsedObject = JSON.parse(jsonObject);
-            const { success, data } =
-              GenQuestionListSchema.safeParse(parsedObject);
-
-            if (success) {
-              setParsedData((prev) => [...prev, data]);
-            }
-          } catch (err) {
-            console.error("Error while parsing JSON:", err);
-          }
-        }
-      }
-    };
-
-    eventSource.onerror = function () {
-      eventSource.close();
-      setisStreamingDone(true);
-      setIsStreaming(false);
-    };
-  };
-
   const onSubmit = async ({ Qamount, model }: formSchema) => {
     switch (SubmitType) {
       case "create-new":
-        await generateStreamData(Topic, Qamount, model);
-        setRawData("");
+        const Url = `${
+          import.meta.env.VITE_API_URL
+        }/generative/streaming/${Topic.replace(
+          / /g,
+          "_"
+        )}?Qamount=${Qamount}&model=${model}`;
+        await StartEventSource(Url);
         break;
 
       default:

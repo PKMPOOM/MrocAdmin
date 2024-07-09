@@ -1,5 +1,5 @@
 import { Button, Result, Tabs, Typography } from "antd";
-import { useEffect } from "react";
+import React, { Suspense, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Skelton from "./SurveyEditorSkeleton";
 // type & interfaces
@@ -7,14 +7,19 @@ import type { TabsProps } from "antd";
 import { SurveyEditorTabs } from "../../../../../Interface/SurveyEditorInterface";
 // store & global context
 // import tabs
-import Tab_build from "./Tab_Build/Tab_build";
-import Tab_detail from "./Tab_Detail/Tab_detail";
-import OverviewPage from "./Tab_Overview&Open/OverviewPage";
-import UserParticipate_Tabs from "./Tab_User_Participate/UserParticipate";
+const Tab_build = React.lazy(() => import("./Tab_Build/Tab_build"));
+const Tab_detail = React.lazy(() => import("./Tab_Detail/Tab_detail"));
+const OverviewPage = React.lazy(
+  () => import("./Tab_Overview&Open/OverviewPage")
+);
+const UserParticipate_Tabs = React.lazy(
+  () => import("./Tab_User_Participate/UserParticipate")
+);
 //hooks
 import { useShallow } from "zustand/react/shallow";
 import { getSurveyData } from "../api";
 import { useSurveyEditorStore } from "~/store/useSurveyEditorStore";
+import LoadingFallback from "~/component/Global/Suspense/LoadingFallback";
 
 const { Title } = Typography;
 
@@ -35,7 +40,6 @@ function SurveyEditor() {
     setSurveyData,
     setSurveyFetchingStatus,
     SetActiveQuestion,
-    activeQuestion,
   ] = useSurveyEditorStore(
     useShallow((state) => [
       state.SetSurveyEditorTabs,
@@ -47,7 +51,6 @@ function SurveyEditor() {
       state.setSurveyData,
       state.setSurveyFetchingStatus,
       state.SetActiveQuestion,
-      state.activeQuestion,
     ])
   );
 
@@ -57,12 +60,20 @@ function SurveyEditor() {
     {
       key: "detail",
       label: `Survey Details`,
-      children: <Tab_detail />,
+      children: (
+        <Suspense fallback={<LoadingFallback />}>
+          <Tab_detail />
+        </Suspense>
+      ),
     },
     {
       key: "build",
       label: `Build`,
-      children: !NewSurvey ? <Tab_build /> : null,
+      children: !NewSurvey ? (
+        <Suspense fallback={<LoadingFallback />}>
+          <Tab_build />
+        </Suspense>
+      ) : null,
       disabled: NewSurvey,
     },
     {
@@ -74,13 +85,21 @@ function SurveyEditor() {
     {
       key: `overview`,
       label: `Overview/Open`,
-      children: !NewSurvey ? <OverviewPage /> : null,
+      children: !NewSurvey ? (
+        <Suspense fallback={<LoadingFallback />}>
+          <OverviewPage />
+        </Suspense>
+      ) : null,
       disabled: NewSurvey,
     },
     {
       key: `userparticipating`,
       label: `User participating`,
-      children: !NewSurvey ? <UserParticipate_Tabs /> : null,
+      children: !NewSurvey ? (
+        <Suspense fallback={<LoadingFallback />}>
+          <UserParticipate_Tabs />
+        </Suspense>
+      ) : null,
       disabled: NewSurvey,
     },
     {
@@ -114,14 +133,22 @@ function SurveyEditor() {
 
   useEffect(() => {
     if (data) {
-      setSurveyMeta({
-        isCreateNew: NewSurvey,
-        surveyID: surveyID || "Newsurvey",
-        queryKey: `/survey/${surveyID}`,
-      });
-      setSurveyData(data);
-      if (activeQuestion.id === "" && data.questionlist[0]) {
-        SetActiveQuestion(0, 0, data.questionlist[0].questions[0].id);
+      const localActiveQuestion = localStorage.getItem("activeQuestion");
+      try {
+        setSurveyMeta({
+          isCreateNew: NewSurvey,
+          surveyID: surveyID || "Newsurvey",
+          queryKey: `/survey/${surveyID}`,
+        });
+        setSurveyData(data);
+        if (localActiveQuestion === null) {
+          SetActiveQuestion(0, 0, "");
+          return;
+        }
+        const parsed = JSON.parse(localActiveQuestion);
+        SetActiveQuestion(parsed.page, parsed.question, parsed.id);
+      } catch (error) {
+        SetActiveQuestion(0, 0, "");
       }
     }
   }, [surveyID, data]);

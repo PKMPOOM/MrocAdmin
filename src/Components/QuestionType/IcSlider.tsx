@@ -1,5 +1,6 @@
 import { Slider } from "antd";
 import { Answer } from "../../Interface/SurveyEditorInterface";
+import { getTextFromBlock } from "~/src/Hooks/Utils/getTextFromBlock";
 
 type SliderProps = {
   scale: Answer[];
@@ -17,10 +18,8 @@ function ICSlider({ scale }: SliderProps) {
   for (let i = 0; i < length; i++) {
     const key = (100 / (length - 1)) * i;
 
-    sliderMarks[key.toFixed(0)] = scale[i].label;
+    sliderMarks[key.toFixed(0)] = getTextFromBlock(scale[i].label);
   }
-
-  // console.log(sliderMarks);
 
   return (
     <div className=" tw-px-10">

@@ -151,7 +151,6 @@ function EditQuestion() {
         >
           <Select
             onChange={(event) => {
-              console.log(event);
               changeQuestionTypeOptimistic({
                 targetType: event,
               });

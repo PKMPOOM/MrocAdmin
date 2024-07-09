@@ -5,7 +5,7 @@ type Props = {
   children?: React.ReactNode;
 } & React.ComponentProps<typeof Button>;
 
-const GenerativeButton = ({ children, ...props }: Props) => {
+const GenerativeButton = ({ children, icon, ...props }: Props) => {
   const defaultBgColor = ["#6253E1", "#04BEFE"];
   const defaultBgColorhover = ["#7b6df9", "#21c6fd"];
   const defaultBgColorActive = ["#5A4ECE", "#04B0EA"];
@@ -35,13 +35,13 @@ const GenerativeButton = ({ children, ...props }: Props) => {
         },
       }}
     >
-      <Button {...props}>
-        <div className=" tw-flex tw-gap-2 tw-items-center tw-justify-center ">
-          <span>
+      <Button {...props} icon={icon ?? <BsStars />}>
+        {children}
+        {/* <div className=" tw-flex tw-gap-2 tw-items-center tw-justify-center ">
+          <span className=" tw-aspect-square ">
             <BsStars />
           </span>
-          {children}
-        </div>
+        </div> */}
       </Button>
     </ConfigProvider>
   );

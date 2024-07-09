@@ -1,15 +1,20 @@
 import { LoadingOutlined } from "@ant-design/icons";
 import { Button, Tabs, Typography, theme } from "antd";
-import { useEffect } from "react";
+import React, { Suspense, useEffect } from "react";
 import { TabItem } from "../../../../../../Interface/DiscussionThreadInterfaces";
 const { Text } = Typography;
 
 // tabs
 import { Link } from "react-router-dom";
-import { useSWRConfig } from "swr";
-import Subtab_Questions from "./Subtab_Build/Subtab_Questions";
-import Subtab_Variables from "./Subtab_Variable/Subtab_Variable";
+const Subtab_Questions = React.lazy(
+  () => import("./Subtab_Build/Subtab_Questions")
+);
+const Subtab_Variables = React.lazy(
+  () => import("./Subtab_Variable/Subtab_Variable")
+);
+
 import { useShallow } from "zustand/react/shallow";
+import LoadingFallback from "~/component/Global/Suspense/LoadingFallback";
 import { useSurveyEditorStore } from "~/store/useSurveyEditorStore";
 
 type buildSubtab = "questions" | "lookfeels" | "variables" | "translation";
@@ -27,13 +32,15 @@ function Tab_build() {
       ])
     );
 
-  const {} = useSWRConfig();
-
   const items: TabItem<buildSubtab>[] = [
     {
       key: "questions",
       label: `Questions`,
-      children: <Subtab_Questions />,
+      children: (
+        <Suspense fallback={<LoadingFallback />}>
+          <Subtab_Questions />
+        </Suspense>
+      ),
     },
     {
       key: `lookfeels`,
@@ -44,7 +51,11 @@ function Tab_build() {
     {
       key: `variables`,
       label: `Variables`,
-      children: <Subtab_Variables />,
+      children: (
+        <Suspense fallback={<LoadingFallback />}>
+          <Subtab_Variables />
+        </Suspense>
+      ),
     },
     {
       key: `translation`,

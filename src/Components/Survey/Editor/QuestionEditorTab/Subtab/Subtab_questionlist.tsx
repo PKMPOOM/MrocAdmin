@@ -38,40 +38,70 @@ const panels: QuestionPanels[] = [
         label: "Single select",
         value: "single_select",
         icon: <FaListUl />,
+        available: true,
       },
       {
         index: 1,
         label: "Multi select",
         value: "multi_select",
         icon: <FaList />,
+        available: true,
       },
-      { index: 2, label: "Text area", value: "text_area", icon: <FaFont /> },
-      { index: 3, label: "Info", value: "info", icon: <FaInfoCircle /> },
+      {
+        index: 2,
+        label: "Text area",
+        value: "text_area",
+        icon: <FaFont />,
+        available: true,
+      },
+      {
+        index: 3,
+        label: "Info",
+        value: "info",
+        icon: <FaInfoCircle />,
+        available: false,
+      },
       {
         index: 4,
         label: "Dropdown",
         value: "dropdown",
         icon: <FaCaretSquareDown />,
+        available: false,
       },
       {
         index: 5,
         label: "Open text list",
         value: "open_text_list",
         icon: <FaFont />,
+        available: false,
       },
-      { index: 6, label: "Date", value: "date", icon: <FaCalendarAlt /> },
+      {
+        index: 6,
+        label: "Date",
+        value: "date",
+        icon: <FaCalendarAlt />,
+        available: false,
+      },
       {
         index: 7,
         label: "Up or Down",
         value: "up_down",
         icon: <FaThumbsUp />,
+        available: false,
       },
-      { index: 8, label: "Input", value: "text_area", icon: <FaTextHeight /> },
+      {
+        index: 8,
+        label: "Input",
+        value: "text_area",
+        icon: <FaTextHeight />,
+        available: false,
+      },
       {
         index: 9,
         label: "File upload",
         value: "file_upload",
         icon: <FaClock />,
+        available: false,
       },
     ],
   },
@@ -79,12 +109,19 @@ const panels: QuestionPanels[] = [
     header: "Grid",
     key: "2",
     questions: [
-      { index: 10, label: "Grid", value: "grid", icon: <FaTh /> },
+      {
+        index: 10,
+        label: "Grid",
+        value: "grid",
+        icon: <FaTh />,
+        available: false,
+      },
       {
         index: 11,
         label: "Side by side",
         value: "side_by_side",
         icon: <FaGripVertical />,
+        available: false,
       },
     ],
   },
@@ -92,22 +129,48 @@ const panels: QuestionPanels[] = [
     header: "Slider",
     key: "3",
     questions: [
-      { index: 12, label: "Slider", value: "slider", icon: <FaSlidersH /> },
-      { index: 13, label: "Rank sort", value: "rank_sort", icon: <FaSort /> },
+      {
+        index: 12,
+        label: "Slider",
+        value: "slider",
+        icon: <FaSlidersH />,
+        available: false,
+      },
+      {
+        index: 13,
+        label: "Rank sort",
+        value: "rank_sort",
+        icon: <FaSort />,
+        available: false,
+      },
       {
         index: 14,
         label: "Allocation slider",
         value: "allocation_slider",
         icon: <FaSlidersH />,
+        available: false,
       },
       {
         index: 15,
         label: "Text balance",
         value: "text_balance",
         icon: <FaBalanceScale />,
+        available: false,
       },
-      { index: 16, label: "Rating", value: "rating", icon: <FaStar /> },
-      { index: 17, label: "NPS", value: "nps", icon: <FaTachometerAlt /> },
+      {
+        index: 16,
+        label: "Rating",
+        value: "rating",
+        icon: <FaStar />,
+        available: false,
+      },
+      {
+        index: 17,
+        label: "NPS",
+        value: "nps",
+        icon: <FaTachometerAlt />,
+        available: false,
+      },
     ],
   },
   {
@@ -119,27 +182,43 @@ const panels: QuestionPanels[] = [
         label: "Quota",
         value: "quota",
         icon: <FaRegCreditCard />,
+        available: false,
       },
-      { index: 19, label: "Screening", value: "screening", icon: <FaBan /> },
+      {
+        index: 19,
+        label: "Screening",
+        value: "screening",
+        icon: <FaBan />,
+        available: false,
+      },
       {
         index: 20,
         label: "Executable block",
         value: "exec_block",
         icon: <FaCogs />,
+        available: false,
       },
       {
         index: 21,
         label: "Terminate",
         value: "terminate",
         icon: <FaTimesCircle />,
+        available: false,
       },
       {
         index: 22,
         label: "Points charger",
         value: "points",
         icon: <FaDollarSign />,
+        available: false,
       },
-      { index: 23, label: "Timing", value: "timing", icon: <FaClock /> },
+      {
+        index: 23,
+        label: "Timing",
+        value: "timing",
+        icon: <FaClock />,
+        available: false,
+      },
     ],
   },
 ];
@@ -163,7 +242,7 @@ function Subtab_questionlist() {
           children: (
             <Droppable
               droppableId={`list_${items.header}`}
-              isDropDisabled
+              isDropDisabled={true}
               renderClone={(provided, _, rubric) => {
                 const currentCard = items.questions[rubric.source.index - 1000];
                 return (
@@ -216,7 +295,7 @@ function Subtab_questionlist() {
                           <QuestionCard
                             value={card.value}
                             draging={snapshot.isDragging}
-                            display={true}
+                            display={card.available}
                             label={card.label}
                             icon={card.icon}
                           />

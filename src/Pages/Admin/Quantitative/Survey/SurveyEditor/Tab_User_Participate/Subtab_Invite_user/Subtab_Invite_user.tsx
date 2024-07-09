@@ -13,6 +13,7 @@ import { UserParticipateTableData } from "../../../../../../../Interface/SurveyE
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../../../../../../../Context/Auth/AuthContext";
 import { useSurveyEditorStore } from "~/store/useSurveyEditorStore";
+import { useShallow } from "zustand/react/shallow";
 
 type InviteUserContext = {
   InviteModalOpen: boolean;
@@ -39,9 +40,10 @@ const dropdownItems = [
 
 function Tab_UserParticipatingInviteUser() {
   const { Axios } = useAuth();
-  const [surveyID] = useSurveyEditorStore((state) => [
-    state.surveyMeta.surveyID,
-  ]);
+  const [surveyMeta] = useSurveyEditorStore(
+    useShallow((state) => [state.surveyMeta])
+  );
+
   const [InviteModalOpen, setInviteModalOpen] = useState(false);
   const [DatePickerModalOpen, setDatePickerModalOpen] = useState(false);
 
@@ -168,16 +170,19 @@ function Tab_UserParticipatingInviteUser() {
 
   const fetchInvitationRuleList = async () => {
     const response = await Axios.get(
-      `survey/${surveyID}/survey_user_participate`
+      `survey/${surveyMeta.surveyID}/survey_user_participate`
     );
     return response.data;
   };
+
+  console.log(surveyMeta.surveyID);
+
   const {
     data: userInvitationRuleList,
     isLoading,
     isFetching,
   } = useQuery<UserParticipateTableData[]>({
-    queryKey: ["InvitationRuleList", "Survey", surveyID],
+    queryKey: ["InvitationRuleList", "Survey", surveyMeta.surveyID],
     queryFn: () => fetchInvitationRuleList(),
     refetchOnWindowFocus: false,
   });

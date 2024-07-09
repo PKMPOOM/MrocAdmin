@@ -3,14 +3,22 @@ import { Checkbox, Input, Radio, Typography } from "antd";
 const { Text } = Typography;
 // import PageBreak from "../../QuestionType/PageBreak";
 // import ICSlider from "../../QuestionType/ICSlider";
+import { BlockNoteView } from "@blocknote/mantine";
+import { useCreateBlockNote } from "@blocknote/react";
+import React from "react";
 import { FaFileUpload } from "react-icons/fa";
-import { Question } from "../../../../Interface/SurveyEditorInterface";
+import { useShallow } from "zustand/react/shallow";
+import { CustomBlockNote } from "~/component/Global/CustomEditor/BlockNoteCustomEditor";
+import { useSurveyEditorStore } from "~/store/useSurveyEditorStore";
+import {
+  Question,
+  TQuestionType,
+} from "../../../../Interface/SurveyEditorInterface";
 import ICSlider from "../../../QuestionType/IcSlider";
 import PageBreak from "../../../QuestionType/PageBreak";
 import QuestionLogic from "./Sub_components/QuestionLogic";
-import { useShallow } from "zustand/react/shallow";
-import React from "react";
-import { useSurveyEditorStore } from "~/store/useSurveyEditorStore";
+import { getInitBlock } from "~/component/Global/CustomEditor/utils";
+import { customQuestionEditorSchema } from "~/component/Global/CustomEditor/Schema/QuestionSchema";
 
 type QuestionPreviewProps = {
   pageSize: number;
@@ -19,7 +27,7 @@ type QuestionPreviewProps = {
   qIndex: number;
 };
 
-function Question_Preview({ pageSize, pIndex, qIndex }: QuestionPreviewProps) {
+function QuestionPreview({ pageSize, pIndex, qIndex }: QuestionPreviewProps) {
   const isLastIndex = pageSize - 1 === qIndex;
   const [setActiveQ, question] = useSurveyEditorStore(
     useShallow((state) => [
@@ -54,7 +62,8 @@ function Question_Preview({ pageSize, pIndex, qIndex }: QuestionPreviewProps) {
               }}
             />
             <div className="tw-flex tw-gap-5">
-              <Text style={{ fontSize: 16 }}>{question.label}</Text>
+              <QuestionDisplayer questionData={question} />
+              {/* <Text style={{ fontSize: 16 }}>{question.label}</Text> */}
               <QuestionLogic
                 questiontype={question.type}
                 forcerequired={question.forcequestionresponse}
@@ -75,7 +84,12 @@ function Question_Preview({ pageSize, pIndex, qIndex }: QuestionPreviewProps) {
                         : "tw-flex-col "
                     }`}
                   >
-                    <Radio>{answer.label}</Radio>
+                    <Radio checked={false}>
+                      <AnswerDisplayer
+                        answer={answer.label}
+                        QuestionType={question.type}
+                      />
+                    </Radio>
                     {answer.openend ? (
                       <Input
                         placeholder={"please answer"}
@@ -94,14 +108,20 @@ function Question_Preview({ pageSize, pIndex, qIndex }: QuestionPreviewProps) {
               {question.type === "multi_select" &&
                 question.answers.map((answer, index) => (
                   <div key={index}>
-                    <Checkbox>{answer.label}</Checkbox>
+                    <Checkbox checked={false}>
+                      <AnswerDisplayer
+                        answer={answer.label}
+                        QuestionType={question.type}
+                      />
+                    </Checkbox>
                   </div>
                 ))}
 
               {question.type === "slider" && (
+                // <>asdfasdf</>
                 <ICSlider scale={question.answers} />
               )}
-              
+
               {question.type === "text_area" && (
                 <Input.TextArea placeholder="please answer" />
               )}
@@ -119,4 +139,57 @@ function Question_Preview({ pageSize, pIndex, qIndex }: QuestionPreviewProps) {
   }
 }
 
-export default React.memo(Question_Preview);
+type Props = {
+  answer: string;
+  QuestionType: TQuestionType;
+};
+
+const AnswerDisplayer = ({ answer }: Props) => {
+  const editor = useCreateBlockNote({
+    initialContent: getInitBlock(answer),
+    trailingBlock: false,
+  });
+
+  return (
+    <BlockNoteView
+      style={{
+        width: "100%",
+        fontSize: 1,
+        height: "100%",
+      }}
+      editable={false}
+      theme={"light"}
+      editor={editor}
+    ></BlockNoteView>
+  );
+};
+
+type QuestionDisplayerProps = {
+  questionData: Question;
+};
+
+const QuestionDisplayer = ({ questionData }: QuestionDisplayerProps) => {
+  try {
+    const editor = useCreateBlockNote({
+      schema: customQuestionEditorSchema,
+      initialContent: getInitBlock(questionData.label),
+      trailingBlock: false,
+    });
+
+    return (
+      <CustomBlockNote
+        editor={editor}
+        handleChange={() => {}}
+        questionIndexData={{
+          pIndex: 0,
+          qIndex: 0,
+          questionID: "0",
+        }}
+      />
+    );
+  } catch (error) {
+    return <Text>{questionData.label}</Text>;
+  }
+};
+
+export default React.memo(QuestionPreview);
