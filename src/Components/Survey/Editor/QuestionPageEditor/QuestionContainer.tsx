@@ -5,11 +5,17 @@ import {
 } from "@ant-design/icons";
 import { Button, Divider, Popconfirm, Typography } from "antd";
 import { produce } from "immer";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import { useSWRConfig } from "swr";
 import { useShallow } from "zustand/react/shallow";
 import GenerativeButton from "~/component/Global/AI/GenerativeButton";
 import { useAuth } from "~/context/Auth/AuthContext";
+import {
+  formatGenerativeQuestion,
+  useGenerativeSurvey,
+} from "~/src/Hooks/Generative";
 import GenerativeQuestionPreview from "~/src/Pages/Admin/Quantitative/Survey/SmartCreate/GenerativeQuestionPreview";
+import { createNewQuestionsFromGenerted } from "~/src/Pages/Admin/Quantitative/Survey/SurveyEditor/Tab_Build/Subtab_Build/api";
 import { useSurveyEditorStore } from "~/store/useSurveyEditorStore";
 import {
   Pages,
@@ -21,12 +27,6 @@ import {
 } from "../QuestionTree/page.api";
 import QuestionActive from "./QuestionActive";
 import QuestionPreview from "./QuestionPreview";
-import {
-  formatGenerativeQuestion,
-  useGenerativeSurvey,
-} from "~/src/Hooks/Generative";
-import { createNewQuestionsFromGenerted } from "~/src/Pages/Admin/Quantitative/Survey/SurveyEditor/Tab_Build/Subtab_Build/api";
-import { useSWRConfig } from "swr";
 
 const { Title, Text } = Typography;
 
@@ -37,12 +37,8 @@ type PageProps = {
 
 //todo add delete page mutation
 function PageContainer({ pages, pIndex }: PageProps) {
-  const [activeQuestion, surveyMeta, SetActiveQuestion] = useSurveyEditorStore(
-    useShallow((state) => [
-      state.activeQuestion,
-      state.surveyMeta,
-      state.SetActiveQuestion,
-    ])
+  const [activeQuestion, surveyMeta] = useSurveyEditorStore(
+    useShallow((state) => [state.activeQuestion, state.surveyMeta])
   );
   const { notificationApi } = useAuth();
   const { trigger: UpdatePageHeaderMutation } =
@@ -61,12 +57,6 @@ function PageContainer({ pages, pIndex }: PageProps) {
     GeneratedCount,
   } = useEventSource();
 
-  useEffect(() => {
-    if (pIndex === 0 && pages.questions[0]?.id) {
-      SetActiveQuestion(0, 0, pages.questions[0].id);
-    }
-  }, []);
-
   const generateQuestionList = async () => {
     const Url = `${
       import.meta.env.VITE_API_URL
@@ -80,6 +70,7 @@ function PageContainer({ pages, pIndex }: PageProps) {
   const acceptgeneratedQuestion = async () => {
     setIsLoading(true);
     const formatedQuestion = formatGenerativeQuestion(parsedData, pages.id);
+    // todo: create optimistoc update
     await createNewQuestionsFromGenerted({
       pageID: pages.id,
       questionList: formatedQuestion,
@@ -255,7 +246,6 @@ function PageContainer({ pages, pIndex }: PageProps) {
               icon={IsStreaming ? <LoadingOutlined /> : null}
               onClick={async () => {
                 await generateQuestionList();
-                console.log("generating");
               }}
             >
               <span className=" tw-px-3">

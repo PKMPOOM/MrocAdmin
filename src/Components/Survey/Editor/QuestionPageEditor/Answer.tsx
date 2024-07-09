@@ -12,7 +12,6 @@ import { produce } from "immer";
 import { debounce } from "lodash";
 import { useCallback, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
-import { getInitBlock } from "~/component/Global/CustomEditor/BlockNoteCustomEditor";
 import { DebounceDelay } from "~/src/Constant/DebounceDelay";
 import { useSurveyEditorStore } from "~/store/useSurveyEditorStore";
 import { useAuth } from "../../../../Context/Auth/AuthContext";
@@ -27,6 +26,7 @@ import {
 } from "../QuestionTree/answer.api";
 import "./Sub_components/inlineEditor.css";
 import OpenEnd from "./Sub_components/OpenEnd";
+import { getInitBlock } from "~/component/Global/CustomEditor/utils";
 
 type AnswerProps = {
   formInstance: any;

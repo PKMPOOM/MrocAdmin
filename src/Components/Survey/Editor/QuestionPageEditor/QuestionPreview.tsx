@@ -8,11 +8,7 @@ import { useCreateBlockNote } from "@blocknote/react";
 import React from "react";
 import { FaFileUpload } from "react-icons/fa";
 import { useShallow } from "zustand/react/shallow";
-import {
-  CustomBlockNote,
-  customSchema,
-  getInitBlock,
-} from "~/component/Global/CustomEditor/BlockNoteCustomEditor";
+import { CustomBlockNote } from "~/component/Global/CustomEditor/BlockNoteCustomEditor";
 import { useSurveyEditorStore } from "~/store/useSurveyEditorStore";
 import {
   Question,
@@ -21,6 +17,8 @@ import {
 import ICSlider from "../../../QuestionType/IcSlider";
 import PageBreak from "../../../QuestionType/PageBreak";
 import QuestionLogic from "./Sub_components/QuestionLogic";
+import { getInitBlock } from "~/component/Global/CustomEditor/utils";
+import { customQuestionEditorSchema } from "~/component/Global/CustomEditor/Schema/QuestionSchema";
 
 type QuestionPreviewProps = {
   pageSize: number;
@@ -120,6 +118,7 @@ function QuestionPreview({ pageSize, pIndex, qIndex }: QuestionPreviewProps) {
                 ))}
 
               {question.type === "slider" && (
+                // <>asdfasdf</>
                 <ICSlider scale={question.answers} />
               )}
 
@@ -172,7 +171,7 @@ type QuestionDisplayerProps = {
 const QuestionDisplayer = ({ questionData }: QuestionDisplayerProps) => {
   try {
     const editor = useCreateBlockNote({
-      schema: customSchema,
+      schema: customQuestionEditorSchema,
       initialContent: getInitBlock(questionData.label),
       trailingBlock: false,
     });

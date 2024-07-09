@@ -46,6 +46,9 @@ export const addAnswerMutation = (
 ) => {
   const { notificationApi } = useAuth();
   const newAnswerID = uuidv4();
+
+  const { pIndex, qIndex, qID } = indexData;
+
   const updaterFn = async () => {
     return await answerAPI.post(null, {
       qID: qID,
@@ -53,8 +56,6 @@ export const addAnswerMutation = (
       label: createAnswerLabel("New Answer"),
     });
   };
-
-  const { pIndex, qIndex, qID } = indexData;
 
   return useSWRMutation(surveyMeta.queryKey, updaterFn, {
     revalidate: true,

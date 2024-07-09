@@ -1,5 +1,7 @@
 import { Checkbox, Input, Radio, Typography } from "antd";
 import { FaFileUpload } from "react-icons/fa";
+import ICSlider from "~/component/QuestionType/IcSlider";
+import { Answer } from "~/interface/SurveyEditorInterface";
 const { Text } = Typography;
 
 export type AIQuestionPreviewProps = {
@@ -39,7 +41,7 @@ function GenerativeQuestionPreview({
           <div className="tw-flex tw-flex-col tw-gap-1 tw-mt-2">
             {type === "single_select" && (
               <Radio.Group>
-                {choices?.map((answer, index) => (
+                {choices.map((answer, index) => (
                   <div key={index} className={`tw-flex`}>
                     <Radio value={answer}>{answer}</Radio>
                   </div>
@@ -61,9 +63,28 @@ function GenerativeQuestionPreview({
 
             {type === "text" && <Input.TextArea placeholder="please answer" />}
 
-            {/* {type === "slider" && (
-                <ICSlider scale={answers} />
-              )} */}
+            {type === "slider" && (
+              <ICSlider
+                scale={choices.map((answer, idx) => {
+                  const newAnswer: Answer = {
+                    label: answer,
+                    id: idx.toString(),
+                    index: idx,
+                    ai_categorize: false,
+                    ai_categorize_list: [],
+                    exclusive: false,
+                    key: idx.toString(),
+                    forceopenendresponse: false,
+                    number_only: false,
+                    openend: false,
+                    openEndDirection: "horizontal",
+                    questionsId: "0",
+                  };
+
+                  return newAnswer;
+                })}
+              />
+            )}
 
             {type === "file_upload" && <FaFileUpload />}
           </div>
