@@ -1,11 +1,4 @@
-import {
-  Block,
-  BlockNoteEditor,
-  BlockNoteSchema,
-  defaultBlockSpecs,
-  defaultProps,
-  filterSuggestionItems,
-} from "@blocknote/core";
+import { BlockNoteEditor, filterSuggestionItems } from "@blocknote/core";
 import "@blocknote/core/fonts/inter.css";
 import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
@@ -15,7 +8,6 @@ import {
   BlockTypeSelectItem,
   blockTypeSelectItems,
   ColorStyleButton,
-  createReactBlockSpec,
   FileCaptionButton,
   FileReplaceButton,
   FormattingToolbar,
@@ -24,111 +16,17 @@ import {
 } from "@blocknote/react";
 import { RiText } from "react-icons/ri";
 import { useShallow } from "zustand/react/shallow";
-import { useSurveyEditorStore } from "~/store/useSurveyEditorStore";
-import { createAiGeneratedQuestion } from "./SlashMenu/AIGeneratedContent";
 import { getTextFromBlock } from "~/src/Hooks/Utils/getTextFromBlock";
-
-export const getInitBlock = (label: string): Block[] => {
-  try {
-    return JSON.parse(label);
-  } catch (error) {
-    return [
-      {
-        id: `id-00`,
-        type: "paragraph",
-        props: {
-          textColor: "default",
-          backgroundColor: "default",
-          textAlignment: "left",
-        },
-        content: [
-          {
-            type: "text",
-            text: label,
-            styles: {},
-          },
-        ],
-        children: [],
-      },
-    ];
-  }
-};
-
-const paragraph = createReactBlockSpec(
-  {
-    type: "paragraph",
-    propSchema: {
-      textAlignment: defaultProps.textAlignment,
-      textColor: defaultProps.textColor,
-    },
-    content: "inline",
-  },
-  {
-    render: (props) => {
-      return (
-        <div className={" tw-text-base"}>
-          <div className={"inline-content"} ref={props.contentRef} />
-        </div>
-      );
-    },
-  }
-);
-
-const textSize = ["xs", "sm", "base", "lg", "xl"];
-
-const CustomParagraph = createReactBlockSpec(
-  {
-    type: "paragraph_1",
-    propSchema: {
-      textAlignment: defaultProps.textAlignment,
-      textColor: defaultProps.textColor,
-      type: {
-        default: "1",
-        values: textSize,
-      },
-    },
-    content: "inline",
-  },
-  {
-    render: (props) => {
-      const textSize = props.block.props.type;
-      return (
-        <div
-          className={`${
-            textSize === "xs"
-              ? "tw-text-xs"
-              : textSize === "sm"
-              ? "tw-text-sm"
-              : textSize === "base"
-              ? "tw-text-base"
-              : textSize === "lg"
-              ? "tw-text-lg"
-              : textSize === "xl"
-              ? "tw-text-xl"
-              : ""
-          }`}
-        >
-          <div ref={props.contentRef} />
-        </div>
-      );
-    },
-  }
-);
-
-export const customSchema = BlockNoteSchema.create({
-  blockSpecs: {
-    ...defaultBlockSpecs,
-    paragraph,
-    paragraph_1: CustomParagraph,
-  },
-});
+import { useSurveyEditorStore } from "~/store/useSurveyEditorStore";
+import { editorTextSize } from "./Schema/QuestionSchema";
+import { createAiGeneratedQuestion } from "./SlashMenu/AIGeneratedContent";
 
 const customBlockList = (
   editor: BlockNoteEditor<any>
 ): BlockTypeSelectItem[] => {
   return [
     ...blockTypeSelectItems(editor.dictionary),
-    ...textSize.map((el) => ({
+    ...editorTextSize.map((el) => ({
       name: `Paragraph ${el}`,
       type: "paragraph_1",
       icon: RiText,
@@ -251,6 +149,7 @@ export const CustomBlockNote = ({
 
       <SuggestionMenuController
         triggerCharacter={"/"}
+        // suggestionMenuComponent={CustomSlashMenu}
         getItems={async (query) =>
           filterSuggestionItems(
             [
