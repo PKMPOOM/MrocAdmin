@@ -88,6 +88,7 @@ export const createAiGeneratedQuestion = (
   },
   aliases: ["ai copywriter", "ai"],
   group: "Ai",
+  badge: "AI",
 
   icon: <BsStars size={18} />,
   subtext: "Create question copy using Ai technology",
