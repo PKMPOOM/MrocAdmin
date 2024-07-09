@@ -183,7 +183,7 @@ function Subtab_Questions() {
               Add Page
             </Button>
           )}
-          <div className=" tw-flex tw-flex-col tw-gap-0">
+          <div className=" tw-flex tw-flex-col tw-gap-0 tw-pb-96">
             {questionlist?.map((pages, pIndex) => (
               <div key={pages.id}>
                 <PageContainer pages={pages} pIndex={pIndex} />

@@ -110,15 +110,19 @@ export const useSurveyEditorStore = create<EditorStoreSelector>((set) => ({
     question: 0,
   },
 
-  SetActiveQuestion: (page, question, id) =>
-    set(
+  SetActiveQuestion: (page, question, id) => {
+    localStorage.setItem(
+      "activeQuestion",
+      JSON.stringify({ page, question, id })
+    );
+    return set(
       produce(({ activeQuestion }) => {
         activeQuestion.page = page;
         activeQuestion.question = question;
         activeQuestion.id = id;
       })
-    ),
-
+    );
+  },
   SelectedPages: [],
   ClearSelectedPages: () => set(() => ({ SelectedPages: [] })),
   SetSelectedPages: (event, PageID) =>
