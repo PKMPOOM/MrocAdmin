@@ -31,7 +31,7 @@ import QuestionCard from "../QuestionCard";
 const panels: QuestionPanels[] = [
   {
     header: "Basic",
-    key: "1",
+    key: "basic",
     questions: [
       {
         index: 0,
@@ -107,7 +107,7 @@ const panels: QuestionPanels[] = [
   },
   {
     header: "Grid",
-    key: "2",
+    key: "grid",
     questions: [
       {
         index: 10,
@@ -127,14 +127,14 @@ const panels: QuestionPanels[] = [
   },
   {
     header: "Slider",
-    key: "3",
+    key: "slider",
     questions: [
       {
         index: 12,
         label: "Slider",
         value: "slider",
         icon: <FaSlidersH />,
-        available: false,
+        available: true,
       },
       {
         index: 13,
@@ -175,7 +175,7 @@ const panels: QuestionPanels[] = [
   },
   {
     header: "Other",
-    key: "4",
+    key: "other",
     questions: [
       {
         index: 18,
@@ -310,7 +310,7 @@ function Subtab_questionlist() {
         }))}
         ghost
         style={{ width: "250px" }}
-        defaultActiveKey={["1"]}
+        defaultActiveKey={["basic", "slider"]}
         expandIcon={({ isActive }) => (
           <CaretRightOutlined rotate={isActive ? 90 : 0} />
         )}
