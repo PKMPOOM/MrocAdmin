@@ -19,7 +19,10 @@ import { useShallow } from "zustand/react/shallow";
 import { getTextFromBlock } from "~/src/Hooks/Utils/getTextFromBlock";
 import { useSurveyEditorStore } from "~/store/useSurveyEditorStore";
 import { editorTextSize } from "./Schema/QuestionSchema";
-import { createAiGeneratedQuestion } from "./SlashMenu/AIGeneratedContent";
+import {
+  AiGenerateContentProps,
+  createAiGeneratedQuestion,
+} from "./SlashMenu/AIGeneratedContent";
 
 const customBlockList = (
   editor: BlockNoteEditor<any>
@@ -76,21 +79,30 @@ export const CustomBlockNote = ({
   questionIndexData,
   generativeFeature,
 }: CreateBlcokProps) => {
-  const [setActiveQ, SetSideTabActiveKey, surveyData] = useSurveyEditorStore(
-    useShallow((state) => [
-      state.SetActiveQuestion,
-      state.SetSideTabActiveKey,
-      state.surveyData,
-    ])
-  );
+  const [setActiveQ, SetSideTabActiveKey, surveyData, activeQuestion] =
+    useSurveyEditorStore(
+      useShallow((state) => [
+        state.SetActiveQuestion,
+        state.SetSideTabActiveKey,
+        state.surveyData,
+        state.activeQuestion,
+      ])
+    );
 
-  const allSurveyQuestion = surveyData?.questionlist
-    .flatMap((el) => el.questions.map((el) => getTextFromBlock(el.label)))
-    .join(", ");
-
-  const allSurveyPageHeader = surveyData?.questionlist
-    .map((el) => el.header)
-    .join(", ");
+  const generationData: AiGenerateContentProps = {
+    surveyData:
+      surveyData?.questionlist.map((el) => {
+        return {
+          header: el.header,
+          questions: el.questions.map((el) => getTextFromBlock(el.label)),
+        };
+      }) || [],
+    instruction: surveyData?.detail.instructions || "",
+    questionType:
+      surveyData?.questionlist[activeQuestion.page].questions[
+        activeQuestion.question
+      ].type || "single_select",
+  };
 
   return (
     <BlockNoteView
@@ -152,12 +164,7 @@ export const CustomBlockNote = ({
         // suggestionMenuComponent={CustomSlashMenu}
         getItems={async (query) =>
           filterSuggestionItems(
-            [
-              createAiGeneratedQuestion(
-                `page header list are ${allSurveyPageHeader} and here's all question in this survey ${allSurveyQuestion}`,
-                generativeFeature
-              ),
-            ],
+            [createAiGeneratedQuestion(generationData, generativeFeature)],
             query
           )
         }

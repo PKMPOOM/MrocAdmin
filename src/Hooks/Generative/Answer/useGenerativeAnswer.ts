@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { getInitBlock } from "~/component/Global/CustomEditor/utils";
 import { TAnswer, answerSchema } from "~/interface/SurveyEditorInterface";
+import { v4 as uuidv4 } from "uuid";
 
 const generateAnswerFormat = (
   label: string,
@@ -8,7 +9,7 @@ const generateAnswerFormat = (
   questionID: string
 ): TAnswer => {
   return {
-    id: index.toString(),
+    id: uuidv4(),
     key: index,
     label: JSON.stringify(getInitBlock(label.trim())),
     index: index,
@@ -60,7 +61,7 @@ const useEventSourceAnswer = () => {
       } else {
         setRawData((prev) => prev + event.data);
         data += event.data;
-        window.scrollTo(0, document.body.scrollHeight);
+        // window.scrollTo(0, document.body.scrollHeight);
 
         const separateIndex = data.indexOf(",");
         if (separateIndex !== -1) {

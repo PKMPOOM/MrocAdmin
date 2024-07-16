@@ -22,6 +22,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../../../../Context/Auth/AuthContext";
 import { StatusOption } from "../../../../../../Interface/SurveyEditorInterface";
 import { useSurveyEditorStore } from "~/store/useSurveyEditorStore";
+import { useShallow } from "zustand/react/shallow";
 
 const { RangePicker } = DatePicker;
 
@@ -41,7 +42,6 @@ const selectOptions: StatusOption[] = [
 ];
 
 function Tab_detail() {
-  // const { SurveyData, NewSurvey, surveyID } = useContext(SurveyEditorContext);
   const [DetailForm] = Form.useForm();
   const queryClient = useQueryClient();
 
@@ -49,31 +49,37 @@ function Tab_detail() {
   const [Loading, setLoading] = useState<boolean>(false);
   const [Saving, setSaving] = useState<boolean>(false);
   const [SetSurveyEditorTabs, surveyMeta, surveyData, setSurveyMeta] =
-    useSurveyEditorStore((state) => [
-      state.SetSurveyEditorTabs,
-      state.surveyMeta,
-      state.surveyData,
-      state.setSurveyMeta,
-    ]);
+    useSurveyEditorStore(
+      useShallow((state) => [
+        state.SetSurveyEditorTabs,
+        state.surveyMeta,
+        state.surveyData,
+        state.setSurveyMeta,
+      ])
+    );
   const navigate = useNavigate();
   const { Axios, AuthUser, notificationApi } = useAuth();
+
+  if (!surveyMeta) {
+    return null;
+  }
 
   const surveyID = surveyMeta.surveyID;
   const NewSurvey = surveyMeta.isCreateNew;
 
-  console.log(NewSurvey);
   const { pathname } = window.location;
   const path = pathname.split("/");
   const lastPath = path[path.length - 1];
 
-  console.log(lastPath);
-
   useEffect(() => {
-    setSurveyMeta({
-      isCreateNew: lastPath === "Newsurvey",
-      surveyID: "",
-      queryKey: "",
-    });
+    // check if user is creating new survey
+    if (lastPath === "Newsurvey") {
+      setSurveyMeta({
+        isCreateNew: lastPath === "Newsurvey",
+        surveyID: "",
+        queryKey: "",
+      });
+    }
   }, []);
 
   const handleAvatarUpload = (file: RcFile) => {
@@ -121,7 +127,6 @@ function Tab_detail() {
       surveyExpired: surveyExpiredRef || false,
       userID: AuthUser?.id,
     };
-    console.log(AuthUser);
 
     setLoading(true);
     await Axios.post(`/survey`, Postbody).then((response) => {
@@ -146,14 +151,15 @@ function Tab_detail() {
     };
 
     setSaving(true);
-    await Axios.put(`survey/${surveyID}/update_details`, Putbody).then(
-      (response) => {
-        setSaving(false);
-        notificationApi.success({
-          message: response.data,
-        });
-      }
-    );
+    await Axios.put(
+      `survey/${surveyMeta.surveyID}/update_details`,
+      Putbody
+    ).then((response) => {
+      setSaving(false);
+      notificationApi.success({
+        message: response.data,
+      });
+    });
     queryClient.invalidateQueries({ queryKey: ["SurveyData", surveyID] });
   };
 

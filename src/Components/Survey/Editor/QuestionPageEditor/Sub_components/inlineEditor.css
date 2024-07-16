@@ -38,6 +38,7 @@
   min-height: 32px;
   display: flex;
   align-items: center;
+  background-color: transparent;
 
   --N800: #172b4d;
   --N40: #dfe1e6;

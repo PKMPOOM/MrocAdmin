@@ -95,11 +95,9 @@ export const useSurveyEditorStore = create<EditorStoreSelector>((set) => ({
     isLoading: false,
     isFetching: false,
   },
+
   setSurveyFetchingStatus: (event) =>
     set(() => ({ surveyFetchingStatus: event })),
-
-  // mutator: undefined,
-  // setMutator: (event) => set(() => ({ mutator: event })),
 
   surveyData: undefined,
   setSurveyData: (event) => set(() => ({ surveyData: event })),
@@ -123,6 +121,7 @@ export const useSurveyEditorStore = create<EditorStoreSelector>((set) => ({
       })
     );
   },
+
   SelectedPages: [],
   ClearSelectedPages: () => set(() => ({ SelectedPages: [] })),
   SetSelectedPages: (event, PageID) =>

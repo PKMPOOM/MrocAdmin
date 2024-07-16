@@ -113,3 +113,11 @@ export const updateAnswerLabel = (surveyMeta: TSurveyMeta) => {
     revalidate: false,
   });
 };
+
+export const deleteAllAnswerMutation = (surveyMeta: TSurveyMeta) => {
+  const updaterFn = async (_: string, { arg }: { arg: string }) => {
+    return await answerAPI.delete(`/all/${arg}`);
+  };
+
+  return useSWRMutation(surveyMeta.queryKey, updaterFn);
+};

@@ -12,12 +12,21 @@ const Subtab_Questions = React.lazy(
 const Subtab_Variables = React.lazy(
   () => import("./Subtab_Variable/Subtab_Variable")
 );
+const Subtab_Instructions = React.lazy(
+  () => import("./Subtab_Build/Subtab_Instructions")
+);
 
 import { useShallow } from "zustand/react/shallow";
 import LoadingFallback from "~/component/Global/Suspense/LoadingFallback";
 import { useSurveyEditorStore } from "~/store/useSurveyEditorStore";
+// import Subtab_Instructions from "./Subtab_Build/Subtab_Instructions";
 
-type buildSubtab = "questions" | "lookfeels" | "variables" | "translation";
+type buildSubtab =
+  | "questions"
+  | "lookfeels"
+  | "variables"
+  | "translation"
+  | "instructions";
 const { useToken } = theme;
 
 function Tab_build() {
@@ -61,6 +70,15 @@ function Tab_build() {
       key: `translation`,
       label: `Translation`,
       children: `<Translation />`,
+    },
+    {
+      key: `instructions`,
+      label: `Ai Instructions`,
+      children: (
+        <Suspense fallback={<LoadingFallback />}>
+          <Subtab_Instructions />
+        </Suspense>
+      ),
     },
   ];
 

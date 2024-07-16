@@ -28,7 +28,10 @@ import {
 } from "../../../../Interface/SurveyEditorInterface";
 import { CustomBlockNote } from "../../../Global/CustomEditor/BlockNoteCustomEditor";
 import PageBreak from "../../../QuestionType/PageBreak";
-import { addAnswerMutation } from "../QuestionTree/answer.api";
+import {
+  addAnswerMutation,
+  deleteAllAnswerMutation,
+} from "../QuestionTree/answer.api";
 import {
   useDeleteQuestionMutation,
   useUpdateQuestionLabel,
@@ -38,7 +41,7 @@ import QuestionLogic from "./Sub_components/QuestionLogic";
 
 const { Text } = Typography;
 
-const GenerativeContainer = styled.div`
+export const GenerativeContainer = styled.div`
   position: relative;
   padding: 4px;
   border-radius: 10px;
@@ -85,6 +88,12 @@ type QuestionProps = {
   qIndex: number;
 };
 
+type LoadingActions =
+  | "delete-all"
+  | "generate-answer"
+  | "accept-answer-generation"
+  | "";
+
 function QuestionActive({
   pageID,
   pageSize,
@@ -94,20 +103,26 @@ function QuestionActive({
 }: QuestionProps) {
   const [questionFrom] = Form.useForm();
   const { notificationApi } = useAuth();
-  const [activeQ, surveyMeta, setSurveyFetchingStatus, SetActiveQuestion] =
-    useSurveyEditorStore(
-      useShallow((state) => [
-        state.activeQuestion,
-        state.surveyMeta,
-        state.setSurveyFetchingStatus,
-        state.SetActiveQuestion,
-      ])
-    );
-  const [SavedText, setSavedText] = useState("");
-  const [IsLoading, setIsLoading] = useState(false);
   const generatedContainerRef = useRef<HTMLDivElement>(null);
-
   const isLastIndex = pageSize - 1 === qIndex;
+
+  const [
+    activeQ,
+    surveyMeta,
+    setSurveyFetchingStatus,
+    SetActiveQuestion,
+    instructions,
+  ] = useSurveyEditorStore(
+    useShallow((state) => [
+      state.activeQuestion,
+      state.surveyMeta,
+      state.setSurveyFetchingStatus,
+      state.SetActiveQuestion,
+      state.surveyData?.detail.instructions,
+    ])
+  );
+  const [SavedText, setSavedText] = useState("");
+  const [IsLoading, setIsLoading] = useState<LoadingActions>("");
 
   const { trigger: deleteQuestion } = useDeleteQuestionMutation(surveyMeta);
   const { trigger: updateQuestionLabel } = useUpdateQuestionLabel(surveyMeta);
@@ -120,9 +135,10 @@ function QuestionActive({
     qIndex: qIndex,
     qID: question.id,
   });
+  const { trigger: deleteAllAnswer } = deleteAllAnswerMutation(surveyMeta);
+
   const { useEventSource: QuestionLabelSSE } = useGenerativeQuestion();
   const { useEventSource: AnswerSSE } = useGenerativeAnswer();
-
   const {
     StartEventSource: answerListGen,
     rawData: rawAnswerList,
@@ -139,8 +155,6 @@ function QuestionActive({
     initialContent: getInitBlock(question.label),
     trailingBlock: false,
   });
-
-  // console.log(GenAnswerList);
 
   useEffect(() => {
     // set the initial value of the question for error rollback
@@ -165,7 +179,12 @@ function QuestionActive({
 
   // scroll to the bottom of the generated container
   useEffect(() => {
-    generatedContainerRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (generatedContainerRef.current) {
+      generatedContainerRef.current.style.scrollMargin = "24px";
+    }
+    generatedContainerRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
   }, [rawAnswerList]);
 
   const debouncedApiCall = useCallback(
@@ -250,25 +269,40 @@ function QuestionActive({
     if (question.label === "" || question.label === null) {
       return;
     }
-    setIsLoading(true);
+
     const questionText = getTextFromBlock(question.label);
+
+    const searchParams = new URLSearchParams({
+      questionType: question.type,
+      questionText: questionText,
+      context: instructions || "",
+      currentChoices: JSON.stringify(
+        question.answers.map((el) => getTextFromBlock(el.label))
+      ),
+    });
+
     const Url = `${
       import.meta.env.VITE_API_URL
     }/generative/streaming/answerlist/${questionText
       .replace(/ /g, "_")
-      .replace(/\?/g, "")}`;
+      .replace(/\?/g, "")}?${searchParams.toString()}`;
     await answerListGen(Url, question.id);
-    setIsLoading(false);
+    setIsLoading("");
   };
 
   const acceptAnswerGeneration = async () => {
     resetGeneration();
+    setIsLoading("accept-answer-generation");
     await createAnswerList(GenAnswerList, {
       revalidate: false,
       optimisticData: (currentData: any) => {
         const nextState = produce(currentData, (draftState: QueryResponse) => {
           const { questionlist } = draftState;
-          questionlist[pIndex].questions[qIndex].answers = GenAnswerList;
+          const newList = [
+            ...questionlist[pIndex].questions[qIndex].answers,
+            ...GenAnswerList,
+          ];
+          questionlist[pIndex].questions[qIndex].answers = newList;
         });
         return nextState;
       },
@@ -280,11 +314,33 @@ function QuestionActive({
         return true;
       },
     });
+    setIsLoading("");
     SetActiveQuestion(pIndex, qIndex, question.id);
     notificationApi.success({
       message: "Success",
       description: "Generated answers added successfully",
     });
+  };
+
+  const handleDeleteAllAnswer = async () => {
+    setIsLoading("delete-all");
+    await deleteAllAnswer(question.id, {
+      revalidate: false,
+      optimisticData: (currentData: any) => {
+        const nextState = produce(currentData, (draftState: QueryResponse) => {
+          const { questionlist } = draftState;
+          questionlist[pIndex].questions[qIndex].answers = [];
+        });
+        return nextState;
+      },
+      onError: () => {
+        notificationApi.error({
+          message: "Error",
+          description: "Error while deleting all answers",
+        });
+      },
+    });
+    setIsLoading("");
   };
 
   return (
@@ -390,7 +446,7 @@ function QuestionActive({
 
         {GenAnswerList.length > 0 && (
           <div className=" tw-w-full tw-rounded-lg tw-bg-gradient-to-r tw-p-[1.5px] tw-relative tw-bg-white ">
-            <GenerativeContainer>
+            <GenerativeContainer ref={generatedContainerRef}>
               {GenAnswerList.map((answer, aIndex) => (
                 <Answer
                   key={answer.id}
@@ -426,7 +482,7 @@ function QuestionActive({
                     <Button
                       type="primary"
                       ghost
-                      loading={IsLoading}
+                      loading={IsLoading === "generate-answer"}
                       onClick={async () => {
                         await acceptAnswerGeneration();
                       }}
@@ -439,7 +495,6 @@ function QuestionActive({
                   icon={IsStreaming ? <LoadingOutlined /> : null}
                   onClick={async () => {
                     await generateAnswerList();
-                    console.log("generating");
                   }}
                 >
                   <span className=" tw-px-3">
@@ -447,7 +502,6 @@ function QuestionActive({
                   </span>
                 </GenerativeButton>
               </div>
-              <div ref={generatedContainerRef}></div>
             </GenerativeContainer>
           </div>
         )}
@@ -471,15 +525,17 @@ function QuestionActive({
                   // addAnswer();
                 }}
                 type="link"
+                loading={IsLoading === "generate-answer"}
                 icon={<BsStars />}
               >
                 Generate
               </Button>
               {question.answers.length > 0 && (
                 <Button
-                  onClick={() => {}}
+                  onClick={handleDeleteAllAnswer}
                   type="link"
                   danger
+                  loading={IsLoading === "delete-all"}
                   icon={<DeleteTwoTone twoToneColor="red" />}
                 >
                   All Answers

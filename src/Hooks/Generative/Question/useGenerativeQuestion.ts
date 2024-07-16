@@ -34,28 +34,6 @@ const useEventSourceQuestion = () => {
         eventSource.close();
       } else {
         setRawData((prev) => prev + event.data);
-        // data += event.data;
-
-        // const endIndex = data.indexOf("}");
-        // if (endIndex !== -1) {
-        //   const startIndex = data.indexOf("{");
-
-        //   const jsonObject = data.slice(startIndex, endIndex + 1); // Extract the JSON object
-        //   data = data.slice(endIndex + 1); // Remove the extracted JSON object from the accumulated data
-        //   setRawData(data); // remove the extracted JSON object from the accumulated data state
-
-        //   try {
-        //     const parsedObject = JSON.parse(jsonObject);
-        //     const { success, data } =
-        //       GenQuestionListSchema.safeParse(parsedObject);
-
-        //     if (success) {
-        //       setParsedData((prev) => [...prev, data]);
-        //     }
-        //   } catch (err) {
-        //     console.error("Error while parsing JSON:", err);
-        //   }
-        // }
       }
     };
 

@@ -73,6 +73,7 @@ export interface DetailData {
   estimatetime: number;
   variable: VariableTypes[];
   usersId: string;
+  instructions: string;
 }
 
 export interface Pages {

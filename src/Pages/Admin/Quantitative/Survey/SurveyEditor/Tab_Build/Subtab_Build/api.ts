@@ -32,3 +32,10 @@ export const createAnswerFromGenerated = (
 
   return useSWRMutation(surveyMeta.queryKey, updaterFn);
 };
+
+export const updateSurveyInstructions = async (
+  instruction: string,
+  id: string
+) => {
+  return generativePageAPI.post("/survey/instructions", { instruction, id });
+};

@@ -62,8 +62,17 @@ export function AiGenerateContentSlash() {
   );
 }
 
+export type AiGenerateContentProps = {
+  surveyData: {
+    header: string;
+    questions: string[];
+  }[];
+  instruction: string;
+  questionType: string;
+};
+
 export const createAiGeneratedQuestion = (
-  jsonData?: string,
+  content: AiGenerateContentProps,
   generativeFeature?: generativeFeature
 ): DefaultReactSuggestionItem => ({
   title: "Question generation",
@@ -73,16 +82,20 @@ export const createAiGeneratedQuestion = (
       return;
     }
 
-    if (jsonData === undefined) {
+    if (content === undefined) {
       return;
     }
+
+    const searchParams = new URLSearchParams({
+      surveyData: JSON.stringify(content.surveyData),
+      instruction: content.instruction,
+      questionType: content.questionType,
+    });
 
     const { StartEventSource } = generativeFeature;
     const Url = `${
       import.meta.env.VITE_API_URL
-    }/generative/streaming/question/${jsonData
-      .replace(/ /g, "_")
-      .replace(/\?/g, "")}`;
+    }/generative/streaming/question/label?${searchParams}`;
 
     await StartEventSource(Url);
   },
