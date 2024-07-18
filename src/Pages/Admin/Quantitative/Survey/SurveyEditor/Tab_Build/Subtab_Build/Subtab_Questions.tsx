@@ -1,7 +1,7 @@
 import { PlusOutlined } from "@ant-design/icons";
 import { Button, Col } from "antd";
 import { produce } from "immer";
-import React from "react";
+import React, { useEffect } from "react";
 import { DragDropContext } from "react-beautiful-dnd";
 import { v4 as uuidv4 } from "uuid";
 import { useShallow } from "zustand/react/shallow";
@@ -23,9 +23,14 @@ import {
 } from "../../../../../../../Interface/SurveyEditorInterface";
 
 function Subtab_Questions() {
-  const [surveyMeta, SurveyData] = useSurveyEditorStore(
-    useShallow((state) => [state.surveyMeta, state.surveyData])
-  );
+  const [surveyMeta, SurveyData, initializeActiveQuestion] =
+    useSurveyEditorStore(
+      useShallow((state) => [
+        state.surveyMeta,
+        state.surveyData,
+        state.initializeActiveQuestion,
+      ])
+    );
 
   const { questionlist } = SurveyData || ({} as QueryResponse);
 
@@ -124,6 +129,10 @@ function Subtab_Questions() {
       );
     }
   };
+
+  useEffect(() => {
+    initializeActiveQuestion();
+  }, []);
 
   if (!questionlist && !surveyMeta.isCreateNew) {
     return <LoadingFallback />;

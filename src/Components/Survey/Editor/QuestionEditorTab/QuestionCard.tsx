@@ -29,8 +29,12 @@ function QuestionCard({
 }: QuestionCardProps) {
   const { token } = useToken();
   const { notificationApi } = useAuth();
-  const [surveyData, surveyMeta] = useSurveyEditorStore(
-    useShallow((state) => [state.surveyData, state.surveyMeta])
+  const [surveyData, surveyMeta, SetActiveQuestion] = useSurveyEditorStore(
+    useShallow((state) => [
+      state.surveyData,
+      state.surveyMeta,
+      state.SetActiveQuestion,
+    ])
   );
 
   if (surveyData) {
@@ -75,6 +79,7 @@ function QuestionCard({
                       );
                     }
                   );
+                  SetActiveQuestion(lastpage, lastIndex + 1, lastPageId);
                   return nextState;
                 },
               }

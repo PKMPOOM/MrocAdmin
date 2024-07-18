@@ -39,7 +39,7 @@ function SurveyEditor() {
     setSurveyMeta,
     setSurveyData,
     setSurveyFetchingStatus,
-    SetActiveQuestion,
+    initializeActiveQuestion,
   ] = useSurveyEditorStore(
     useShallow((state) => [
       state.SetSurveyEditorTabs,
@@ -50,7 +50,7 @@ function SurveyEditor() {
       state.setSurveyMeta,
       state.setSurveyData,
       state.setSurveyFetchingStatus,
-      state.SetActiveQuestion,
+      state.initializeActiveQuestion,
     ])
   );
 
@@ -133,23 +133,13 @@ function SurveyEditor() {
 
   useEffect(() => {
     if (data) {
-      const localActiveQuestion = localStorage.getItem("activeQuestion");
-      try {
-        setSurveyMeta({
-          isCreateNew: NewSurvey,
-          surveyID: surveyID || "Newsurvey",
-          queryKey: `/survey/${surveyID}`,
-        });
-        setSurveyData(data);
-        if (localActiveQuestion === null) {
-          SetActiveQuestion(0, 0, "");
-          return;
-        }
-        const parsed = JSON.parse(localActiveQuestion);
-        SetActiveQuestion(parsed.page, parsed.question, parsed.id);
-      } catch (error) {
-        SetActiveQuestion(0, 0, "");
-      }
+      setSurveyMeta({
+        isCreateNew: NewSurvey,
+        surveyID: surveyID || "Newsurvey",
+        queryKey: `/survey/${surveyID}`,
+      });
+      setSurveyData(data);
+      initializeActiveQuestion();
     }
   }, [surveyID, data]);
 

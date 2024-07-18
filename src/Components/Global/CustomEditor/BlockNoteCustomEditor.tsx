@@ -23,6 +23,7 @@ import {
   AiGenerateContentProps,
   createAiGeneratedQuestion,
 } from "./SlashMenu/AIGeneratedContent";
+import { useEffect } from "react";
 
 const customBlockList = (
   editor: BlockNoteEditor<any>
@@ -79,15 +80,21 @@ export const CustomBlockNote = ({
   questionIndexData,
   generativeFeature,
 }: CreateBlcokProps) => {
-  const [setActiveQ, SetSideTabActiveKey, surveyData, activeQuestion] =
-    useSurveyEditorStore(
-      useShallow((state) => [
-        state.SetActiveQuestion,
-        state.SetSideTabActiveKey,
-        state.surveyData,
-        state.activeQuestion,
-      ])
-    );
+  const [
+    setActiveQ,
+    SetSideTabActiveKey,
+    surveyData,
+    activeQuestion,
+    initializeActiveQuestion,
+  ] = useSurveyEditorStore(
+    useShallow((state) => [
+      state.SetActiveQuestion,
+      state.SetSideTabActiveKey,
+      state.surveyData,
+      state.activeQuestion,
+      state.initializeActiveQuestion,
+    ])
+  );
 
   const generationData: AiGenerateContentProps = {
     surveyData:
@@ -101,8 +108,12 @@ export const CustomBlockNote = ({
     questionType:
       surveyData?.questionlist[activeQuestion.page].questions[
         activeQuestion.question
-      ].type || "single_select",
+      ]?.type || "single_select",
   };
+
+  useEffect(() => {
+    initializeActiveQuestion();
+  }, [questionIndexData.questionID]);
 
   return (
     <BlockNoteView

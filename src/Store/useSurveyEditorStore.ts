@@ -79,6 +79,7 @@ type Action = {
   setOpenEndCategorizeModalOpen: (event: boolean, aID: string) => void;
   setCategorizeListArray: (event: string[]) => void;
   setSurveyFetchingStatus: (event: TSurveyFetchingStatus) => void;
+  initializeActiveQuestion: () => void;
 };
 
 export type EditorStoreSelector = State & Action;
@@ -107,6 +108,54 @@ export const useSurveyEditorStore = create<EditorStoreSelector>((set) => ({
     page: 0,
     question: 0,
   },
+
+  initializeActiveQuestion: () =>
+    set((state) => {
+      const initState = {
+        page: 0,
+        question: 0,
+        id: "",
+      };
+
+      const surveyData = state.surveyData;
+
+      if (!surveyData) {
+        return {
+          activeQuestion: initState,
+        };
+      }
+
+      try {
+        const localActiveQuestion = localStorage.getItem("activeQuestion");
+        if (localActiveQuestion === null) {
+          return {
+            activeQuestion: initState,
+          };
+        }
+        const parsed = JSON.parse(localActiveQuestion);
+        // check if the active question is valid
+        if (
+          parsed.page >= surveyData.questionlist.length ||
+          parsed.question >=
+            surveyData.questionlist[parsed.page].questions.length
+        ) {
+          return {
+            activeQuestion: initState,
+          };
+        }
+        return {
+          activeQuestion: {
+            page: parsed.page,
+            question: parsed.question,
+            id: parsed.id,
+          },
+        };
+      } catch (error) {
+        return {
+          activeQuestion: initState,
+        };
+      }
+    }),
 
   SetActiveQuestion: (page, question, id) => {
     localStorage.setItem(

@@ -37,8 +37,12 @@ type PageProps = {
 
 //todo add delete page mutation
 function PageContainer({ pages, pIndex }: PageProps) {
-  const [activeQuestion, surveyMeta] = useSurveyEditorStore(
-    useShallow((state) => [state.activeQuestion, state.surveyMeta])
+  const [activeQuestion, surveyMeta, instructions] = useSurveyEditorStore(
+    useShallow((state) => [
+      state.activeQuestion,
+      state.surveyMeta,
+      state.surveyData?.detail.instructions,
+    ])
   );
   const { notificationApi } = useAuth();
   const { trigger: UpdatePageHeaderMutation } =
@@ -58,12 +62,16 @@ function PageContainer({ pages, pIndex }: PageProps) {
   } = useEventSource();
 
   const generateQuestionList = async () => {
+    const searchParams = new URLSearchParams({
+      Qamount: "3",
+      instruction: instructions ?? "",
+      model: AIModel,
+    });
+
     const Url = `${
       import.meta.env.VITE_API_URL
-    }/generative/streaming/${pages.header.replace(
-      / /g,
-      "_"
-    )}?Qamount=${3}&model=${AIModel}`;
+    }/generative/streaming/${pages.header.replace(/ /g, "_")}?${searchParams}`;
+
     await StartEventSource(Url);
   };
 
