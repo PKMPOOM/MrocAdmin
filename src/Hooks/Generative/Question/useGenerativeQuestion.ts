@@ -57,7 +57,7 @@ const useEventSourceQuestion = () => {
 };
 
 export const useGenerativeQuestion = () => {
-  const [AIModel, setAIModel] = useState("gpt-3.5-turbo");
+  const [AIModel, setAIModel] = useState("gpt-4o-mini");
 
   return {
     AIModel,

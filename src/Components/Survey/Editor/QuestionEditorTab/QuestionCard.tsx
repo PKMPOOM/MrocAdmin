@@ -11,6 +11,7 @@ import {
   TQuestionType,
 } from "~/interface/SurveyEditorInterface";
 import { questionTemplate } from "~/component/Helper/QuestionAnswerDefault";
+import { getInitBlock } from "~/component/Global/CustomEditor/utils";
 const { useToken } = theme;
 type QuestionCardProps = {
   value: TQuestionType;
@@ -57,7 +58,7 @@ function QuestionCard({
             await addQuestionLastIndex(
               {
                 type: value,
-                label: label,
+                label: JSON.stringify(getInitBlock(label)),
                 lastpage: lastpage,
                 lastPageId: lastPageId,
                 lastIndex: lastIndex,
@@ -70,7 +71,7 @@ function QuestionCard({
                       const { questionlist } = draftState;
                       const newQuestion: Question = {
                         ...questionTemplate,
-                        label: `New ${label} question`,
+                        label: JSON.stringify(getInitBlock(label)),
                         type: value,
                         answers: [],
                       };

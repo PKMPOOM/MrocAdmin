@@ -21,6 +21,7 @@ import {
   QueryResponse,
   Question,
 } from "../../../../../../../Interface/SurveyEditorInterface";
+import { getInitBlock } from "~/component/Global/CustomEditor/utils";
 
 function Subtab_Questions() {
   const [surveyMeta, SurveyData, initializeActiveQuestion] =
@@ -98,8 +99,8 @@ function Subtab_Questions() {
     if (source.index >= 1000) {
       const newQuestion: Question = {
         ...questionTemplate,
-        label: `${draggableId}`,
         id: uuidv4(),
+        label: JSON.stringify(getInitBlock(`New ${draggableId} question`)),
         key: 0,
         type: draggableId.toLowerCase().replace(/ /g, "_"),
       };

@@ -144,7 +144,7 @@ const SmartCreatePage = () => {
                 onFinish={onSubmit}
                 requiredMark={"optional"}
                 initialValues={{
-                  model: "gpt-3.5-turbo",
+                  model: "gpt-4o-mini",
                   Qamount: 3,
                 }}
               >
@@ -163,7 +163,7 @@ const SmartCreatePage = () => {
                       >
                         <Select
                           options={[
-                            { label: "GPT-3.5 turbo", value: "gpt-3.5-turbo" },
+                            { label: "GPT-3.5 turbo", value: "gpt-4o-mini" },
                             { label: "GPT-4o", value: "gpt-4o" },
                           ]}
                         />

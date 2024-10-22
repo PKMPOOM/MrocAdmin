@@ -5,6 +5,7 @@ export const GenQuestionListSchema = z.object({
   label: z.string(),
   answer: z.array(z.string()),
   type: z.string(),
+  instruction: z.string(),
 });
 
 export type GenQuestionList = z.infer<typeof GenQuestionListSchema>;

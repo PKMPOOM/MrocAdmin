@@ -110,7 +110,7 @@ export const useAddQuestionOnClick = (surveyMeta: TSurveyMeta) => {
   ) => {
     return await questionAPI.post(null, {
       questionType: arg.type,
-      questionLabel: `New ${arg.label} question`,
+      questionLabel: arg.label,
       pageID: arg.lastPageId,
       index: arg.lastIndex + 1,
     });

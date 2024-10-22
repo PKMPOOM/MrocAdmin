@@ -2,10 +2,10 @@ import { Dayjs } from "dayjs";
 import { ReactNode } from "react";
 import { z } from "zod";
 
-export interface StatusOption {
+export type StatusOption = {
   value: SurveyStatusValue;
   label: string;
-}
+};
 
 export type SurveyStatusValue = "Active" | "Draft" | "Closed";
 
@@ -23,10 +23,10 @@ export type SurveyEditorTabs =
 export type OverviewSubtab = "overview" | "quota manager";
 export type userparticipatingSubtab = "invite_users" | "view_list";
 
-export interface QueryResponse {
+export type QueryResponse = {
   detail: DetailData;
   questionlist: Pages[];
-}
+};
 
 export type SurveylistTypes = {
   id: string;
@@ -51,7 +51,7 @@ export type SurveylistTypes = {
   owner: string;
 };
 
-export interface DetailData {
+export type DetailData = {
   id: string;
   key: React.Key;
   name: string;
@@ -74,18 +74,18 @@ export interface DetailData {
   variable: VariableTypes[];
   usersId: string;
   instructions: string;
-}
+};
 
-export interface Pages {
+export type Pages = {
   id: string;
   key: React.Key;
   header: string;
   isselected: boolean;
   surveysIdsurveys: string;
   questions: Question[];
-}
+};
 
-export interface Question {
+export type Question = {
   id: string;
   key: number | null;
   index: number;
@@ -102,7 +102,7 @@ export interface Question {
   sortdir: "asc" | "dsc";
   pageIdpage: string;
   answers: Answer[];
-}
+};
 
 export const QuestionTypeSchema = z.union([
   z.literal("single_select"),
@@ -133,7 +133,7 @@ export const QuestionTypeSchema = z.union([
 
 export type TQuestionType = z.infer<typeof QuestionTypeSchema>;
 
-export interface Answer {
+export type Answer = {
   id: string;
   key: number | string;
   label: string;
@@ -146,7 +146,7 @@ export interface Answer {
   ai_categorize_list: any[];
   questionsId: string;
   openEndDirection: "vertical" | "horizontal";
-}
+};
 
 export const answerSchema = z.object({
   id: z.string(),
@@ -165,19 +165,19 @@ export const answerSchema = z.object({
 
 export type TAnswer = z.infer<typeof answerSchema>;
 
-export interface QuestionPanels {
+export type QuestionPanels = {
   header: string;
   key: string;
   questions: QuestionCard[];
-}
+};
 
-export interface QuestionCard {
+export type QuestionCard = {
   index: number;
   label: string;
   value: TQuestionType;
   icon: ReactNode;
   available: boolean;
-}
+};
 
 export type VariableTypes = {
   id: string;

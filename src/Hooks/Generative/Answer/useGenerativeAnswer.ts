@@ -99,7 +99,7 @@ const useEventSourceAnswer = () => {
 };
 
 export const useGenerativeAnswer = () => {
-  const [AIModel, setAIModel] = useState("gpt-3.5-turbo");
+  const [AIModel, setAIModel] = useState("gpt-4o-mini");
 
   return {
     AIModel,

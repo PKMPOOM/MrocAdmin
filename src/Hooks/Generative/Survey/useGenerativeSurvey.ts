@@ -84,7 +84,7 @@ const useEventSourceQuestion = () => {
 };
 
 export const useGenerativeSurvey = () => {
-  const [AIModel, setAIModel] = useState("gpt-3.5-turbo");
+  const [AIModel, setAIModel] = useState("gpt-4o-mini");
 
   return {
     AIModel,
